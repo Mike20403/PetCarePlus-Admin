@@ -1,4 +1,4 @@
-import { api } from '@/axios'
+import { api } from './axios'
 import type { Appointment, PaginationParams, ListResponse } from '@/types/api'
 
 export class AppointmentsService {

@@ -1,11 +1,11 @@
 // Export all services for easy importing
-export { AuthService } from './auth.service'
-export { PetsService } from './pets.service'
-export { CustomersService } from './customers.service'
-export { AppointmentsService } from './appointments.service'
-export { getDashboardStats, getMonthlyAppointments, getMonthlyRevenue } from './dashboard.service'
-export { userService } from './user.service'
-export { settingsService } from './settings.service'
+export { AuthService } from '@/api/auth.service'
+export { PetsService } from '@/api/pets.service'
+export { CustomersService } from '@/api/customers.service'
+export { AppointmentsService } from '@/api/appointments.service'
+export { getDashboardStats, getMonthlyAppointments, getMonthlyRevenue } from '@/api/dashboard.service'
+export { userService } from '@/api/user.service'
+export { settingsService } from '@/api/settings.service'
 
 // Re-export types for convenience
 export type { ApiResponse, ApiError } from '@/types/api'

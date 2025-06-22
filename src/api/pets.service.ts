@@ -1,4 +1,4 @@
-import { api } from '@/axios'
+import { api } from './axios'
 import type { Pet, PaginationParams, ListResponse, ApiResponse } from '@/types/api'
 
 export class PetsService {

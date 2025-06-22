@@ -1,4 +1,4 @@
-import axios from '@/axios';
+import axios from './axios';
 import type { User } from '@/types/api';
 
 export const userService = {
@@ -18,6 +18,6 @@ export const userService = {
 		return axios.delete(`/api/users/${id}`);
 	},
 	getAllRoles() {
-		return axios.get('/api/roles'); // Assuming an API endpoint for roles
+		return axios.get('/api/roles');
 	}
 };

@@ -1,6 +1,6 @@
-import { api } from '@/axios'
 import type { LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse, ApiResponse } from '@/types/api'
 import { TokenManager } from '@/utils/auth'
+import { api } from './axios'
 
 export class AuthService {
 	private static readonly BASE_URL = '/auth'

@@ -7,67 +7,67 @@ const router = createRouter({
 		{
 			path: '/login',
 			name: 'login',
-			component: () => import('@/views/LoginView.vue'),
+			component: () => import('@/features/auth/pages/LoginView.vue'),
 			meta: { public: true, title: 'Login' }
 		},
 		{
 			path: '/',
 			name: 'dashboard',
-			component: () => import('@/views/DashboardView.vue'),
-			meta: { requiresAuth: true, title: 'Dashboard', permissions: ['dashboard:view'] }
+			component: () => import('@/features/dashboard/pages/DashboardView.vue'),
+			meta: { requiresAuth: false, title: 'Dashboard', permissions: ['dashboard:view'] }
 		},
 		{
 			path: '/pets',
 			name: 'pets',
-			component: () => import('@/views/PetsView.vue'),
-			meta: { requiresAuth: true, title: 'Pets', permissions: ['pets:view'] }
+			component: () => import('@/features/pets/pages/PetsView.vue'),
+			meta: { requiresAuth: false, title: 'Pets', permissions: ['pets:view'] }
 		},
 		{
 			path: '/appointments',
 			name: 'appointments',
-			component: () => import('@/views/AppointmentsView.vue'),
-			meta: { requiresAuth: true, title: 'Appointments', permissions: ['appointments:view'] }
+			component: () => import('@/features/appointments/pages/AppointmentsView.vue'),
+			meta: { requiresAuth: false, title: 'Appointments', permissions: ['appointments:view'] }
 		},
 		{
 			path: '/customers',
 			name: 'customers',
-			component: () => import('@/views/CustomersView.vue'),
-			meta: { requiresAuth: true, title: 'Customers', permissions: ['customers:view'] }
+			component: () => import('@/features/customers/pages/CustomersView.vue'),
+			meta: { requiresAuth: false, title: 'Customers', permissions: ['customers:view'] }
 		},
 		{
 			path: '/reports',
 			name: 'reports',
-			component: () => import('@/views/ReportsView.vue'),
-			meta: { requiresAuth: true, title: 'Reports', permissions: ['reports:view'] }
+			component: () => import('@/features/reports/pages/ReportsView.vue'),
+			meta: { requiresAuth: false, title: 'Reports', permissions: ['reports:view'] }
 		},
 		{
 			path: '/profile',
 			name: 'profile',
-			component: () => import('@/views/ProfileView.vue'),
-			meta: { requiresAuth: true, title: 'Profile' }
+			component: () => import('@/features/profile/pages/ProfileView.vue'),
+			meta: { requiresAuth: false, title: 'Profile' }
 		},
 		{
 			path: '/settings',
 			name: 'settings',
-			component: () => import('@/views/SettingsView.vue'),
-			meta: { requiresAuth: true, title: 'Settings', roles: ['ADMIN'] }
+			component: () => import('@/features/settings/pages/SettingsView.vue'),
+			meta: { requiresAuth: false, title: 'Settings', roles: ['ADMIN'] }
 		},
 		{
 			path: '/test-table',
 			name: 'test-table',
-			component: () => import('@/views/TestTableView.vue'),
-			meta: { requiresAuth: true, title: 'Test Table', roles: ['ADMIN'] }
+			component: () => import('@/features/test-table/pages/TestTableView.vue'),
+			meta: { requiresAuth: false, title: 'Test Table', roles: ['ADMIN'] }
 		},
 		{
 			path: '/users',
 			name: 'users',
-			component: () => import('@/views/UsersView.vue'),
-			meta: { requiresAuth: true, title: 'Users', roles: ['ADMIN'] }
+			component: () => import('@/features/users/pages/UsersView.vue'),
+			meta: { requiresAuth: false, title: 'Users', roles: ['ADMIN'] }
 		},
 		{
 			path: '/:pathMatch(.*)*',
 			name: 'not-found',
-			component: () => import('@/views/NotFoundView.vue'),
+			component: () => import('@/features/error/pages/NotFoundView.vue'),
 			meta: { title: 'Not Found' }
 		},
 	] as RouteRecordRaw[],

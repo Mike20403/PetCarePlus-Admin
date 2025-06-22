@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { RouterLink, useRouter } from 'vue-router'
-import { AuthService } from '@/services/auth.service'
+import { AuthService } from '@/api/auth.service'
 import { TokenManager } from '@/utils/auth'
 
 const router = useRouter()
