@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "PetCare+ Admin Dashboard built with Vue.js and Tabler.io",
+  "description": "PetCare+ Admin Dashboard built with Vue.js, Tabler.io, ưu tiên sử dụng components, icons, thư viện sẵn có; chỉ implement mới khi cần thiết/phức tạp; code modular, dễ maintain; page api ready, component reusable.",
   "scripts": {
     "dev": "vite --port 3000 --open",
     "build": "vite build",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@tabler/core": "^1.3.2",
     "@tabler/icons": "^3.34.0",
+    "@tabler/icons-vue": "^3.34.0",
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "pinia": "^3.0.1",
@@ -34,6 +35,7 @@
     "jiti": "^2.4.2",
     "npm-run-all2": "^7.0.2",
     "prettier": "3.5.3",
+    "sass-embedded": "^1.89.2",
     "typescript": "~5.8.0",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2",

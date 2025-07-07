@@ -1,0 +1,44 @@
+import { ref } from 'vue'
+import { UserService, type UserCriteria, type UpdateUserRequest } from '@/api/user.service'
+import type { User } from '@/types/user'
+
+export function useUsers() {
+  const users = ref<User[]>([])
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+
+  async function fetchUsers(criteria?: UserCriteria, page = 1, size = 10, sortBy = 'createdAt', sort: 'asc' | 'desc' = 'asc') {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await UserService.getUsers(criteria, page, size, sortBy, sort)
+      users.value = res.data.items || []
+    } catch (e: any) {
+      error.value = e.message || 'Failed to fetch users'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function updateUser(id: string, data: UpdateUserRequest) {
+    return UserService.updateUser(id, data)
+  }
+
+  async function changeUserRole(id: string, role: string) {
+    return UserService.changeUserRole(id, role)
+  }
+
+  async function toggleUserBlockStatus(id: string, blocked: boolean) {
+    return UserService.toggleUserBlockStatus(id, blocked)
+  }
+
+  return {
+    users,
+    loading,
+    error,
+    fetchUsers,
+    updateUser,
+    changeUserRole,
+    toggleUserBlockStatus
+  }
+} 

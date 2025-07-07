@@ -1,0 +1,39 @@
+// PetCarePlus-Admin Cursor Rules (2024)
+
+// General
+- Use Vue 3 with the Composition API and <script setup> for all components.
+- All new code must use TypeScript.
+- Strictly follow the current folder structure; place files in the correct location.
+- Use SCSS for styling, prefer BEM naming, but always check and reuse existing classes before creating new ones.
+- Do not add comments unless explicitly requested.
+- Do not auto-fix lint errors; follow the current lint configuration.
+- Ensure all UI is responsive and consistent with the current design system.
+
+// Components & UI
+- Prioritize using existing components, icons, and libraries in the project (Tabler, @/components, @/common/components).
+- Only implement new components when truly necessary or for special/complex requirements.
+- All components must be modular, maintainable, extensible, and as reusable as possible.
+- When being requested to implement a page. That page should have reusable component generated with props ( component that is newly generated must be reusable with props).
+- The component must follow the design token, predefined classes rules or design tokens to consistent in all over the app so that when we change a sizing or value in the design all the code change along.
+- All interactive elements (buttons, modals, etc.) must have consistent hover and active effects with the product design.
+
+// API & Types
+- Place all API calls in src/api/, using the existing axios instance.
+- Create or update types in src/types/ to match backend schemas exactly.
+- When integrating endpoints, create or reuse hooks for data fetching (if not available, create in the correct location).
+- Prefer composite API patterns for complex data flows.
+
+// Routing & State
+- Use the router in src/router/index.ts for navigation.
+- Use Pinia for state management; add new stores in src/stores/ if needed.
+
+// Code Quality
+- Code must be clean, maintainable, extensible, and follow the existing architecture.
+- Only use architectural patterns already present in the project.
+- Confirm before making major changes.
+
+// Internationalization
+- If adding new text, ensure it is ready for i18n (use translation keys if the project supports it).
+
+// Testing
+- If adding new features, ensure they are testable and follow the current testing approach (if any).

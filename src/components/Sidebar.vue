@@ -1,149 +1,526 @@
 <template>
-	<header class="navbar-expand-md">
-		<div class="collapse navbar-collapse" id="navbar-menu">
-			<div class="navbar">
-				<div class="container-xl">
-					<ul class="navbar-nav">
-						<li class="nav-item" v-if="authStore.hasPermission('dashboard:view')">
-							<RouterLink to="/" class="nav-link" active-class="active">
-								<span class="nav-link-icon d-md-none d-lg-inline-block">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-										viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-										stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="m0 0h24v24H0z" fill="none" />
-										<path d="M5 12l-2 0l9 -9l9 9l-2 0" />
-										<path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-										<path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-									</svg>
-								</span>
-								<span class="nav-link-title">Dashboard</span>
-							</RouterLink>
-						</li>
-						<li class="nav-item" v-if="authStore.hasPermission('pets:view')">
-							<RouterLink to="/pets" class="nav-link" active-class="active">
-								<span class="nav-link-icon d-md-none d-lg-inline-block">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-										viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-										stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="m0 0h24v24H0z" fill="none" />
-										<path d="M11 5h2" />
-										<path d="M19 12c-.667 5.333 -2.333 8 -5 8h0c-2.667 0 -4.333 -2.667 -5 -8" />
-										<path d="M11 3c6 0 9 4 9 9c0 .8 -.15 1.4 -.3 2" />
-										<path d="M10 11c0 .667 .333 1 1 1s1 -.333 1 -1h-2z" />
-										<path d="M8 11c0 .667 .333 1 1 1s1 -.333 1 -1h-2z" />
-									</svg>
-								</span>
-								<span class="nav-link-title">Pets</span>
-							</RouterLink>
-						</li>
-						<li class="nav-item" v-if="authStore.hasPermission('appointments:view')">
-							<RouterLink to="/appointments" class="nav-link" active-class="active">
-								<span class="nav-link-icon d-md-none d-lg-inline-block">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-										viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-										stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="m0 0h24v24H0z" fill="none" />
-										<path
-											d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
-										<path d="M16 3v4" />
-										<path d="M8 3v4" />
-										<path d="M4 11h16" />
-										<path d="M7 14h.013" />
-										<path d="M10.01 14h.005" />
-										<path d="M13.01 14h.005" />
-										<path d="M16.015 14h.005" />
-										<path d="M13.015 17h.005" />
-										<path d="M7.01 17h.005" />
-										<path d="M10.01 17h.005" />
-									</svg>
-								</span>
-								<span class="nav-link-title">Appointments</span>
-							</RouterLink>
-						</li>
-						<li class="nav-item" v-if="authStore.hasPermission('customers:view')">
-							<RouterLink to="/customers" class="nav-link" active-class="active">
-								<span class="nav-link-icon d-md-none d-lg-inline-block">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-										viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-										stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="m0 0h24v24H0z" fill="none" />
-										<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-										<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-									</svg>
-								</span>
-								<span class="nav-link-title">Customers</span>
-							</RouterLink>
-						</li>
-						<li class="nav-item" v-if="authStore.hasPermission('reports:view')">
-							<RouterLink to="/reports" class="nav-link" active-class="active">
-								<span class="nav-link-icon d-md-none d-lg-inline-block">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-										viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-										stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="m0 0h24v24H0z" fill="none" />
-										<path
-											d="M3 12m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-										<path
-											d="M9 8m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-										<path
-											d="M15 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-										<path d="M4 20l14 0" />
-									</svg>
-								</span>
-								<span class="nav-link-title">Reports</span>
-							</RouterLink>
-						</li>
-						<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
-							<RouterLink to="/users" class="nav-link" active-class="active">
-								<span class="nav-link-icon d-md-none d-lg-inline-block">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-										viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-										stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="m0 0h24v24H0z" fill="none" />
-										<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-										<path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-									</svg>
-								</span>
-								<span class="nav-link-title">Users</span>
-							</RouterLink>
-						</li>
-						<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
-							<RouterLink to="/settings" class="nav-link" active-class="active">
-								<span class="nav-link-icon d-md-none d-lg-inline-block">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-										viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-										stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="m0 0h24v24H0z" fill="none" />
-										<path
-											d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37a1.724 1.724 0 0 0 2.572 -1.065z" />
-										<path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-									</svg>
-								</span>
-								<span class="nav-link-title">Settings</span>
-							</RouterLink>
-						</li>
-					</ul>
-				</div>
+	<aside class="sidebar" :class="{ 'sidebar-collapsed': sidebarStore.isCollapsed }">
+		<div class="sidebar-header">
+			<div class="logo-container">
+				<RouterLink to="/" class="logo">
+					<!-- Logo placeholders - will use actual logo files when provided -->
+					<div v-if="!sidebarStore.isCollapsed" class="logo-expanded">
+						<img src="/logo.png" alt="PetCare+ Admin" class="logo-image">
+						<div class="logo-text">
+							<span class="logo-main">PetCare+</span>
+							<span class="logo-sub">Admin</span>
+						</div>
+					</div>
+					<div v-else class="logo-collapsed">
+						<img src="/logo.png" alt="PC+" class="logo-image-sm">
+						<!-- <span class="logo-icon">PC+</span> -->
+					</div>
+				</RouterLink>
+			</div>
+			<button class="collapse-btn" @click="sidebarStore.toggleSidebar" title="Toggle Sidebar">
+				<IconChevronLeft v-if="sidebarStore.isCollapsed" />
+				<IconChevronRight v-else />
+			</button>
+		</div>
+
+		<div class="sidebar-content">
+			<!-- Main Section -->
+			<div class="nav-section">
+				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">Overview</div>
+				<ul class="nav-items">
+					<li class="nav-item">
+						<RouterLink to="/" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconHome />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Dashboard</span>
+							<span v-if="!sidebarStore.isCollapsed" class="nav-link-badge badge bg-blue ms-auto">3</span>
+						</RouterLink>
+					</li>
+				</ul>
+			</div>
+
+			<!-- Management Section -->
+			<div class="nav-section">
+				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">Management</div>
+				<ul class="nav-items">
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
+						<RouterLink to="/users" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconUsers />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Users</span>
+						</RouterLink>
+					</li>
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
+						<RouterLink to="/bookings" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconCalendar />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Bookings</span>
+							<span v-if="!sidebarStore.isCollapsed" class="nav-link-badge badge bg-yellow ms-auto">12</span>
+						</RouterLink>
+					</li>
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
+						<RouterLink to="/services" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconPaw />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Services</span>
+						</RouterLink>
+					</li>
+				</ul>
+			</div>
+
+			<!-- Operations Section -->
+			<div class="nav-section">
+				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">Operations</div>
+				<ul class="nav-items">
+					<li class="nav-item">
+						<RouterLink to="/pets" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconPaw />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Pets</span>
+						</RouterLink>
+					</li>
+					<li class="nav-item">
+						<RouterLink to="/appointments" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconCalendar />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Appointments</span>
+						</RouterLink>
+					</li>
+					<li class="nav-item">
+						<RouterLink to="/customers" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconUsers />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Customers</span>
+						</RouterLink>
+					</li>
+				</ul>
+			</div>
+
+			<!-- Finance Section -->
+			<div class="nav-section">
+				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">Finance</div>
+				<ul class="nav-items">
+					<li class="nav-item">
+						<RouterLink to="/reports" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconFile />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Reports</span>
+						</RouterLink>
+					</li>
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
+						<RouterLink to="/withdrawals" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconFile />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Withdrawals</span>
+						</RouterLink>
+					</li>
+				</ul>
+			</div>
+
+			<!-- System Section -->
+			<div class="nav-section">
+				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">System</div>
+				<ul class="nav-items">
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
+						<RouterLink to="/terms" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconFile />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Terms & Policies</span>
+						</RouterLink>
+					</li>
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
+						<RouterLink to="/settings" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconSettings />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Settings</span>
+						</RouterLink>
+					</li>
+				</ul>
 			</div>
 		</div>
-	</header>
+
+		<!-- Sidebar Footer -->
+		<div class="sidebar-footer" v-if="!sidebarStore.isCollapsed">
+			<div class="nav-item">
+				<a href="#" class="nav-link" @click.prevent="logout">
+					<span class="nav-link-icon">
+						<IconLogout />
+					</span>
+					<span class="nav-link-title">Logout</span>
+				</a>
+			</div>
+		</div>
+	</aside>
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useSidebarStore } from '@/stores/sidebar'
+import { onMounted } from 'vue'
+import { AuthService } from '@/api/auth.service'
+import { TokenManager } from '@/utils/auth'
+
+import { 
+	IconChevronLeft, 
+	IconChevronRight, 
+	IconHome, 
+	IconUsers, 
+	IconCalendar, 
+	IconFile, 
+	IconSettings, 
+	IconLogout, 
+	IconPaw, 
+} from '@tabler/icons-vue'
 
 const authStore = useAuthStore()
+const sidebarStore = useSidebarStore()
+const router = useRouter()
+
+async function logout() {
+	try {
+		await AuthService.logout()
+		TokenManager.clearAuth()
+		authStore.clearAuthData()
+		router.push('/login')
+	} catch (error) {
+		console.error('Logout failed:', error)
+		// Force logout even if API call fails
+		TokenManager.clearAuth()
+		authStore.clearAuthData()
+		router.push('/login')
+	}
+}
+
+// Initialize sidebar state on mount
+onMounted(() => {
+	sidebarStore.initializeSidebarState()
+})
 </script>
 
 <style scoped>
-.nav-link.active {
-	background-color: var(--tblr-primary);
-	color: white !important;
-	border-radius: 0.375rem;
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 250px;
+	background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+	color: white;
+	transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+	overflow-x: hidden;
+	border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.nav-link.active .nav-link-icon {
-	color: white !important;
+.sidebar-collapsed {
+	width: 70px;
+}
+
+.sidebar-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem;
+	height: 60px;
+	box-sizing: border-box;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	flex-shrink: 0;
+}
+
+.logo-container {
+	overflow: hidden;
+	flex: 1;
+}
+
+.logo {
+	color: white;
+	text-decoration: none;
+	display: block;
+}
+
+.logo-expanded {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.logo-text {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.2;
+}
+
+.logo-main {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: #60a5fa;
+}
+
+.logo-sub {
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: rgba(255, 255, 255, 0.7);
+	margin-top: -2px;
+}
+
+.logo-collapsed {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.logo-icon {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #60a5fa;
+}
+
+.logo-image {
+	height: 32px;
+	width: auto;
+}
+
+.logo-image-sm {
+	height: 24px;
+	width: auto;
+}
+
+.collapse-btn {
+	background: none;
+	border: none;
+	color: rgba(255, 255, 255, 0.7);
+	cursor: pointer;
+	padding: 0.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.375rem;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+}
+
+.collapse-btn:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	color: white;
+}
+
+.sidebar-content {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	padding: 1.5rem 0;
+	flex: 1;
+	overflow-y: auto;
+}
+
+.sidebar-footer {
+	padding: 1rem 0;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	flex-shrink: 0;
+}
+
+.nav-section {
+	display: flex;
+	flex-direction: column;
+}
+
+.nav-section-title {
+	font-size: 0.6875rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: rgba(255, 255, 255, 0.5);
+	padding: 0 1rem 0.75rem 1rem;
+	transition: opacity 0.3s ease;
+}
+
+.sidebar-collapsed .nav-section-title {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.nav-items {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.nav-item {
+	/* No margin needed */
+}
+
+.nav-link {
+	display: flex;
+	align-items: center;
+	padding: 0.75rem 1rem;
+	color: rgba(255, 255, 255, 0.8);
+	text-decoration: none;
+	transition: all 0.2s ease;
+	border-radius: 0.5rem;
+	margin: 0 0.75rem;
+	position: relative;
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.sidebar-collapsed .nav-link {
+	padding: 0.75rem;
+	justify-content: center;
+	margin: 0 0.5rem;
+}
+
+.nav-link:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	color: white;
+	transform: translateX(2px);
+}
+
+.nav-link.active {
+	background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+	color: white;
+	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.nav-link.active::before {
+	content: '';
+	position: absolute;
+	left: -0.75rem;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 3px;
+	height: 20px;
+	background: #60a5fa;
+	border-radius: 0 2px 2px 0;
+}
+
+.nav-link-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 0.75rem;
+	flex-shrink: 0;
+	transition: margin-right 0.3s ease;
+}
+
+.sidebar-collapsed .nav-link-icon {
+	margin-right: 0;
+}
+
+.nav-link-title {
+	flex: 1;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: opacity 0.3s ease;
+}
+
+.nav-link-badge {
+	font-size: 0.6875rem;
+	font-weight: 600;
+	padding: 0.125rem 0.375rem;
+	border-radius: 0.25rem;
+	transition: opacity 0.3s ease;
+}
+
+.sidebar-collapsed .nav-link-title,
+.sidebar-collapsed .nav-link-badge {
+	opacity: 0;
+	width: 0;
+	overflow: hidden;
+}
+
+/* Custom scrollbar */
+.sidebar::-webkit-scrollbar {
+	width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.2);
+	border-radius: 2px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+/* Icon size consistency */
+.icon {
+	width: 20px;
+	height: 20px;
+	stroke-width: 1.5;
+}
+
+/* Badge colors */
+.badge.bg-blue {
+	background-color: #3b82f6 !important;
+}
+
+.badge.bg-yellow {
+	background-color: #f59e0b !important;
+}
+
+.badge.bg-green {
+	background-color: #10b981 !important;
+}
+
+.badge.bg-red {
+	background-color: #ef4444 !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+	.sidebar {
+		transform: translateX(-100%);
+		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	
+	.sidebar.mobile-open {
+		transform: translateX(0);
+	}
+}
+
+/* Tooltip for collapsed state */
+.sidebar-collapsed .nav-link {
+	position: relative;
+}
+
+.sidebar-collapsed .nav-link:hover::after {
+	content: attr(title);
+	position: absolute;
+	left: 100%;
+	top: 50%;
+	transform: translateY(-50%);
+	background: #1f2937;
+	color: white;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.375rem;
+	font-size: 0.875rem;
+	white-space: nowrap;
+	margin-left: 0.5rem;
+	z-index: 1000;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	pointer-events: none;
 }
 </style>

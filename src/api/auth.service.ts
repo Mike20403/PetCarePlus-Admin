@@ -1,4 +1,4 @@
-import type { LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse, ApiResponse } from '@/types/api'
+import type { LoginRequest, LoginResponse, RefreshTokenResponse, UserInfo } from '@/types/auth'
 import { TokenManager } from '@/utils/auth'
 import { api } from './axios'
 
@@ -7,22 +7,33 @@ export class AuthService {
 
 	// Login user
 	static async login(credentials: LoginRequest): Promise<LoginResponse> {
-		const response = await api.post<ApiResponse<LoginResponse>>(`${this.BASE_URL}/login`, credentials)
+		const response = await api.post<LoginResponse>(`${this.BASE_URL}/login`, credentials)
 
-		if (response.data.success && response.data.data) {
-			TokenManager.storeLoginResponse(response.data.data)
-			return response.data.data
+		if (response.data) {
+			// Store the login response
+			TokenManager.storeLoginResponse(response.data)
+			return response.data
 		}
 
-		throw new Error(response.data.message || 'Login failed')
+		throw new Error('Login failed')
 	}
 
 	// Logout user
 	static async logout(): Promise<void> {
 		try {
-			await api.post(`${this.BASE_URL}/logout`)
+			const token = TokenManager.getAccessToken();
+			if (!token) {
+				throw new Error('No access token available');
+			}
+			
+			// Backend expects a GET request with Authorization header
+			await api.get(`${this.BASE_URL}/logout`, {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
 		} finally {
-			TokenManager.clearAuth()
+			TokenManager.clearAuth();
 		}
 	}
 
@@ -33,40 +44,42 @@ export class AuthService {
 			throw new Error('No refresh token available')
 		}
 
-		const response = await api.post<ApiResponse<RefreshTokenResponse>>(`${this.BASE_URL}/refresh`, {
-			refreshToken
+		// Backend expects a GET request with refreshToken in the request body
+		const response = await api.get<RefreshTokenResponse>(`${this.BASE_URL}/refresh`, {
+			data: { refreshToken }  // This will be sent as the request body even in a GET request
 		})
 
-		if (response.data.success && response.data.data) {
-			TokenManager.storeRefreshResponse(response.data.data)
-			return response.data.data
+		if (response.data) {
+			// Store the refresh response
+			TokenManager.storeRefreshResponse(response.data)
+			return response.data
 		}
 
-		throw new Error(response.data.message || 'Token refresh failed')
+		throw new Error('Token refresh failed')
 	}
 
 	// Get current user profile
-	static async getCurrentUser(): Promise<any> {
-		const response = await api.get<ApiResponse<LoginResponse['user']>>(`${this.BASE_URL}/me`)
+	static async getCurrentUser(): Promise<UserInfo> {
+		const response = await api.get<UserInfo>(`${this.BASE_URL}/me`)
 
-		if (response.data.success && response.data.data) {
-			TokenManager.setUser(response.data.data)
-			return response.data.data
+		if (response.data) {
+			TokenManager.setUser(response.data)
+			return response.data
 		}
 
-		throw new Error(response.data.message || 'Failed to get user profile')
+		throw new Error('Failed to get user profile')
 	}
 
 	// Update user profile
-	static async updateProfile(profileData: any): Promise<any> {
-		const response = await api.put(`${this.BASE_URL}/profile`, profileData)
+	static async updateProfile(profileData: any): Promise<UserInfo> {
+		const response = await api.put<UserInfo>(`${this.BASE_URL}/profile`, profileData)
 
-		if (response.data.success && response.data.data) {
-			TokenManager.setUser(response.data.data)
-			return response.data.data
+		if (response.data) {
+			TokenManager.setUser(response.data)
+			return response.data
 		}
 
-		throw new Error(response.data.message || 'Failed to update profile')
+		throw new Error('Failed to update profile')
 	}
 
 	// Change password
@@ -76,8 +89,8 @@ export class AuthService {
 			newPassword
 		})
 
-		if (!response.data.success) {
-			throw new Error(response.data.message || 'Failed to change password')
+		if (response.status !== 200) {
+			throw new Error('Failed to change password')
 		}
 	}
 
@@ -89,5 +102,20 @@ export class AuthService {
 	// Get stored user data
 	static getCurrentUserData(): any | null {
 		return TokenManager.getUser()
+	}
+	
+	// Parse JWT token to get expiration time
+	static parseJwt(token: string): any {
+		try {
+			const base64Url = token.split('.')[1];
+			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+			const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+				return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+			}).join(''));
+			
+			return JSON.parse(jsonPayload);
+		} catch (e) {
+			return null;
+		}
 	}
 }

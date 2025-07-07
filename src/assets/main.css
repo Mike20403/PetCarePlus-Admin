@@ -1,3 +1,7 @@
+/* Import base styles */
+@import './base.css';
+
+/* Global styles */
 html, body {
   height: 100%;
   margin: 0 !important;
@@ -6,4 +10,246 @@ html, body {
 
 #app {
   height: 100%;
+}
+
+/* Utility classes */
+.text-primary {
+  color: var(--color-primary-500) !important;
+}
+
+.text-secondary {
+  color: var(--color-secondary-500) !important;
+}
+
+.text-success {
+  color: var(--color-success-500) !important;
+}
+
+.text-warning {
+  color: var(--color-warning-500) !important;
+}
+
+.text-error {
+  color: var(--color-error-500) !important;
+}
+
+.text-info {
+  color: var(--color-info-500) !important;
+}
+
+.bg-primary {
+  background-color: var(--color-primary-500) !important;
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary-500) !important;
+}
+
+.bg-success {
+  background-color: var(--color-success-500) !important;
+}
+
+.bg-warning {
+  background-color: var(--color-warning-500) !important;
+}
+
+.bg-error {
+  background-color: var(--color-error-500) !important;
+}
+
+.bg-info {
+  background-color: var(--color-info-500) !important;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.status-badge-pending {
+  background-color: var(--color-status-pending);
+  color: var(--color-neutral-0);
+}
+
+.status-badge-approved {
+  background-color: var(--color-status-approved);
+  color: var(--color-neutral-0);
+}
+
+.status-badge-rejected {
+  background-color: var(--color-status-rejected);
+  color: var(--color-neutral-0);
+}
+
+.status-badge-completed {
+  background-color: var(--color-status-completed);
+  color: var(--color-neutral-0);
+}
+
+.status-badge-cancelled {
+  background-color: var(--color-status-cancelled);
+  color: var(--color-neutral-0);
+}
+
+.status-badge-active {
+  background-color: var(--color-status-active);
+  color: var(--color-neutral-0);
+}
+
+.status-badge-inactive {
+  background-color: var(--color-status-inactive);
+  color: var(--color-neutral-0);
+}
+
+.status-badge-blocked {
+  background-color: var(--color-status-blocked);
+  color: var(--color-neutral-0);
+}
+
+/* Card styles */
+.custom-card {
+  background-color: var(--color-card-background);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-duration-fast) var(--transition-timing-ease);
+}
+
+.custom-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.custom-card-header {
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.custom-card-body {
+  padding: var(--spacing-4);
+}
+
+.custom-card-footer {
+  padding: var(--spacing-4);
+  border-top: 1px solid var(--color-card-border);
+}
+
+/* Button styles */
+.custom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-duration-fast) var(--transition-timing-ease);
+  cursor: pointer;
+  border: none;
+}
+
+.custom-btn-primary {
+  background-color: var(--color-button-primary-bg);
+  color: var(--color-button-primary-text);
+}
+
+.custom-btn-primary:hover {
+  background-color: var(--color-button-primary-hover-bg);
+}
+
+.custom-btn-secondary {
+  background-color: var(--color-button-secondary-bg);
+  color: var(--color-button-secondary-text);
+}
+
+.custom-btn-secondary:hover {
+  background-color: var(--color-button-secondary-hover-bg);
+}
+
+.custom-btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--color-button-outline-border);
+  color: var(--color-button-outline-text);
+}
+
+.custom-btn-outline:hover {
+  background-color: var(--color-button-outline-hover-bg);
+}
+
+/* Form styles */
+.custom-form-group {
+  margin-bottom: var(--spacing-4);
+}
+
+.custom-form-label {
+  display: block;
+  margin-bottom: var(--spacing-1);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.custom-form-input {
+  width: 100%;
+  padding: var(--spacing-2);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-input-bg);
+  color: var(--color-input-text);
+  transition: all var(--transition-duration-fast) var(--transition-timing-ease);
+}
+
+.custom-form-input:focus {
+  outline: none;
+  border-color: var(--color-input-focus-border);
+  box-shadow: var(--color-input-focus-shadow);
+}
+
+.custom-form-input::placeholder {
+  color: var(--color-input-placeholder);
+}
+
+/* Table styles */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th {
+  background-color: var(--color-table-header-bg);
+  padding: var(--spacing-3);
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 2px solid var(--color-table-border);
+}
+
+.custom-table td {
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--color-table-border);
+}
+
+.custom-table tr:nth-child(even) {
+  background-color: var(--color-table-row-stripe);
+}
+
+.custom-table tr:hover {
+  background-color: var(--color-table-row-hover);
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-on-desktop {
+    display: none !important;
+  }
 }

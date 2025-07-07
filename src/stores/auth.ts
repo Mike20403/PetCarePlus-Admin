@@ -1,71 +1,129 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { LoginResponse } from '@/types/api'
+import { ref, computed } from 'vue'
+import type { LoginResponse, RefreshTokenResponse } from '@/types/auth'
+import type { User } from '@/types/user'
 import { TokenManager } from '@/utils/auth'
+import { AuthService } from '@/api/auth.service'
 
 export const useAuthStore = defineStore('auth', () => {
-	const user = ref<LoginResponse['user'] | null>(TokenManager.getUser())
-	const accessToken = ref<string | null>(TokenManager.getAccessToken())
+	const user = ref<User | null>(TokenManager.getUser())
+	const token = ref<string | null>(TokenManager.getAccessToken())
 	const refreshToken = ref<string | null>(TokenManager.getRefreshToken())
-	const isAuthenticated = ref<boolean>(TokenManager.isAuthenticated())
-	const roles = ref<string[]>(user.value?.roles || [])
-	const permissions = ref<string[]>(user.value?.permissions || [])
+	
+	const isAuthenticated = computed(() => {
+		const hasToken = !!token.value
+		const tokenValid = !TokenManager.isTokenExpired()
+		return hasToken && tokenValid
+	})
+	
+	const roles = ref<string[]>([])
+	const permissions = ref<string[]>([])
+	const tokenExpiry = ref<number | null>(TokenManager.getTokenExpiry())
+	const refreshTokenExpiry = ref<number | null>(TokenManager.getRefreshTokenExpiry())
 
 	function setAuthData(data: LoginResponse) {
-		user.value = data.user
-		accessToken.value = data.accessToken
+		token.value = data.token
 		refreshToken.value = data.refreshToken || null
-		isAuthenticated.value = true
-		roles.value = data.user?.roles || []
-		permissions.value = data.user?.permissions || []
-		TokenManager.storeLoginResponse(data)
+	
+		if (data.expiresIn) {
+			tokenExpiry.value = data.expiresIn.token ? Date.now() + data.expiresIn.token : null
+			refreshTokenExpiry.value = data.expiresIn.refreshToken ? Date.now() + data.expiresIn.refreshToken : null
+		}
+		
+		TokenManager.storeLoginResponse({
+			...data,
+			expiresIn: data.expiresIn
+		})
 	}
 
-	function setTokens(data: { accessToken: string; refreshToken?: string }) {
-		accessToken.value = data.accessToken
+	function setTokens(data: RefreshTokenResponse) {
+		token.value = data.token
 		if (data.refreshToken) {
 			refreshToken.value = data.refreshToken
 		}
-		TokenManager.storeRefreshResponse(data)
+		
+		if (data.expiresIn) {
+			tokenExpiry.value = data.expiresIn.token ? Date.now() + data.expiresIn.token : null
+			if (data.expiresIn.refreshToken) {
+				refreshTokenExpiry.value = Date.now() + data.expiresIn.refreshToken
+			}
+		}
+		
+		TokenManager.storeRefreshResponse({
+			...data,
+			expiresIn: data.expiresIn
+		})
 	}
 
-	function setUserData(userData: LoginResponse['user']) {
+	function setUserData(userData: User) {
 		user.value = userData
-		roles.value = userData?.roles || []
-		permissions.value = userData?.permissions || []
+		if (userData?.role) {
+			roles.value = [userData.role]
+		}
 		TokenManager.setUser(userData)
 	}
 
 	function clearAuthData() {
 		user.value = null
-		accessToken.value = null
+		token.value = null
 		refreshToken.value = null
-		isAuthenticated.value = false
 		roles.value = []
 		permissions.value = []
+		tokenExpiry.value = null
+		refreshTokenExpiry.value = null
 		TokenManager.clearAuth()
 	}
 
 	function hasRole(roleName: string): boolean {
+		if (!roles.value || roles.value.length === 0) {
+			return true
+		}
 		return roles.value.includes(roleName)
 	}
 
 	function hasPermission(permissionName: string): boolean {
+		if (!permissions.value || permissions.value.length === 0) {
+			return true
+		}
 		return permissions.value.includes(permissionName)
+	}
+	
+	async function refreshAuthToken(): Promise<boolean> {
+		try {
+			if (!refreshToken.value || TokenManager.isRefreshTokenExpired()) {
+				clearAuthData()
+				return false
+			}
+			
+			const response = await AuthService.refreshToken()
+			setTokens(response)
+			return true
+		} catch (error) {
+			clearAuthData()
+			return false
+		}
+	}
+	
+	function isTokenExpired(): boolean {
+		return TokenManager.isTokenExpired()
 	}
 
 	return {
 		user,
-		accessToken,
+		token,
 		refreshToken,
 		isAuthenticated,
 		roles,
 		permissions,
+		tokenExpiry,
+		refreshTokenExpiry,
 		setAuthData,
 		setTokens,
 		setUserData,
 		clearAuthData,
 		hasRole,
-		hasPermission
+		hasPermission,
+		refreshAuthToken,
+		isTokenExpired
 	}
 })

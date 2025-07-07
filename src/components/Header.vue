@@ -1,16 +1,10 @@
 <template>
-	<header class="navbar navbar-expand-md d-print-none" data-bs-theme="dark">
-		<div class="container-xl">
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
-				aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-				<RouterLink to="/">
-					PetCare+ Admin
-				</RouterLink>
-			</h1>
-			<div class="navbar-nav flex-row order-md-last">
+	<header class="app-header" :style="{ left: sidebarStore.sidebarWidth + 'px' }">
+		<div class="header-content">
+			<div class="header-title">
+				<h1 class="page-title">{{ currentPageTitle }}</h1>
+			</div>
+			<div class="header-actions">
 				<div class="nav-item dropdown">
 					<a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
 						aria-label="Open user menu">
@@ -42,11 +36,20 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRouter, useRoute } from 'vue-router'
 import { AuthService } from '@/api/auth.service'
 import { TokenManager } from '@/utils/auth'
+import { useSidebarStore } from '@/stores/sidebar'
+import { computed } from 'vue'
 
 const router = useRouter()
+const route = useRoute()
+const sidebarStore = useSidebarStore()
+
+// Get the current page title from route meta
+const currentPageTitle = computed(() => {
+	return route.meta.title || 'Dashboard'
+})
 
 async function logout() {
 	try {
@@ -60,8 +63,61 @@ async function logout() {
 </script>
 
 <style scoped>
-.navbar-brand a {
-	color: inherit;
-	text-decoration: none;
+.app-header {
+	position: fixed;
+	top: 0;
+	right: 0;
+	height: 60px;
+	background-color: white;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	z-index: 900;
+	transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-content {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 100%;
+	padding: 0 1.5rem;
+}
+
+.header-title {
+	display: flex;
+	align-items: center;
+}
+
+.page-title {
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin: 0;
+	color: var(--tblr-dark);
+}
+
+.header-actions {
+	display: flex;
+	align-items: center;
+}
+
+.avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background-color: var(--tblr-primary);
+	color: white;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+	.app-header {
+		left: 0 !important;
+	}
+	
+	.header-content {
+		padding: 0 1rem;
+	}
 }
 </style>

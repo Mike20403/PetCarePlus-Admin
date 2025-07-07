@@ -1,7 +1,10 @@
 <template>
-	<div class="card">
+	<div class="card custom-card">
 		<div class="card-header">
-			<h3 class="card-title">Data Table</h3>
+			<h3 class="card-title">{{ title || 'Data Table' }}</h3>
+			<div v-if="$slots.headerActions" class="card-actions">
+				<slot name="headerActions"></slot>
+			</div>
 		</div>
 		<div class="card-body">
 			<div class="d-flex justify-content-between mb-3">
@@ -32,7 +35,7 @@
 			</div>
 
 			<div class="table-responsive">
-				<table class="table table-vcenter card-table table-striped">
+				<table class="table table-vcenter card-table table-striped custom-table">
 					<thead>
 						<tr>
 							<th v-for="header in headers" :key="header.key" @click="sortBy(header.key)"
@@ -40,23 +43,64 @@
 								{{ header.title }}
 								<span v-if="header.sortable">
 									<span v-if="sortKey === header.key">
-										<span v-if="sortDirection === 'asc'">&uarr;</span>
-										<span v-else>&darr;</span>
+										<span v-if="sortDirection === 'asc'" class="text-primary">&uarr;</span>
+										<span v-else class="text-primary">&darr;</span>
 									</span>
 								</span>
 							</th>
+							<th v-if="hasActions" class="text-end">Actions</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr v-if="loading">
-							<td :colspan="headers.length" class="text-center">Loading...</td>
+							<td :colspan="hasActions ? headers.length + 1 : headers.length" class="text-center">
+								<div class="spinner-border text-primary" role="status">
+									<span class="visually-hidden">Loading...</span>
+								</div>
+								<span class="ms-2">Loading...</span>
+							</td>
 						</tr>
 						<tr v-else-if="paginatedItems.length === 0">
-							<td :colspan="headers.length" class="text-center">No data available</td>
+							<td :colspan="hasActions ? headers.length + 1 : headers.length" class="text-center">
+								<div class="empty">
+									<div class="empty-icon">
+										<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-database-off" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+											<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+											<path d="M12.983 8.978c3.955 -.182 7.017 -1.446 7.017 -2.978c0 -1.657 -3.582 -3 -8 -3c-1.661 0 -3.204 .19 -4.483 .515m-3.01 1.265c-.309 .323 -.507 .676 -.507 1.05c0 1.657 3.582 3 8 3c.986 0 1.93 -.067 2.802 -.19"></path>
+											<path d="M4 6v6c0 1.657 3.582 3 8 3c3.217 0 5.991 -.712 7.261 -1.74m.739 -3.26v-4"></path>
+											<path d="M4 12v6c0 1.657 3.582 3 8 3c3.217 0 5.991 -.712 7.261 -1.74m.739 -3.26v-4"></path>
+											<path d="M3 3l18 18"></path>
+										</svg>
+									</div>
+									<p class="empty-title">No data available</p>
+									<p class="empty-subtitle text-muted">
+										Try adjusting your search or filter to find what you're looking for.
+									</p>
+								</div>
+							</td>
 						</tr>
 						<tr v-else v-for="(item, index) in paginatedItems" :key="index">
 							<td v-for="header in headers" :key="header.key">
-								{{ item[header.key] }}
+								<template v-if="header.formatter">
+									<span v-html="header.formatter(item[header.key], item)"></span>
+								</template>
+								<template v-else-if="header.type === 'status'">
+									<span :class="'status-badge status-badge-' + item[header.key].toLowerCase()">
+										{{ item[header.key] }}
+									</span>
+								</template>
+								<template v-else-if="header.type === 'date'">
+									{{ formatDate(item[header.key]) }}
+								</template>
+								<template v-else-if="header.type === 'currency'">
+									{{ formatCurrency(item[header.key]) }}
+								</template>
+								<template v-else>
+									{{ item[header.key] }}
+								</template>
+							</td>
+							<td v-if="hasActions" class="text-end">
+								<slot name="rowActions" :item="item" :index="index"></slot>
 							</td>
 						</tr>
 					</tbody>
@@ -110,14 +154,40 @@ interface DataTableHeader {
 	key: string;
 	title: string;
 	sortable?: boolean;
+	type?: 'text' | 'date' | 'currency' | 'status';
+	formatter?: (value: any, item: any) => string;
 }
 
-const props = defineProps<{
-	headers: DataTableHeader[];
-	items: any[];
-	loading: boolean;
-	totalItems?: number; // Optional, for server-side pagination if needed later
-}>();
+const props = defineProps({
+	headers: {
+		type: Array as () => DataTableHeader[],
+		required: true
+	},
+	items: {
+		type: Array as () => Record<string, any>[],
+		required: true
+	},
+	loading: {
+		type: Boolean,
+		default: false
+	},
+	totalItems: {
+		type: Number,
+		default: undefined
+	},
+	title: {
+		type: String,
+		default: ''
+	},
+	hasActions: {
+		type: Boolean,
+		default: false
+	},
+	itemsPerPageOptions: {
+		type: Array as () => number[],
+		default: () => [10, 25, 50, 100]
+	}
+});
 
 interface DataTableEmits {
 	(event: 'update:sort', key: string, direction: 'asc' | 'desc'): void;
@@ -130,7 +200,7 @@ const emit = defineEmits<DataTableEmits>();
 
 // Pagination
 const currentPage = ref(1);
-const itemsPerPage = ref(10); // Default items per page
+const itemsPerPage = ref(props.itemsPerPageOptions[0]); // Default items per page
 
 const totalPages = computed(() => {
 	return Math.ceil(filteredItems.value.length / itemsPerPage.value);
@@ -187,7 +257,7 @@ function onFilter() {
 
 // Combined Search and Filter Logic
 const filteredItems = computed(() => {
-	let currentItems = props.items;
+	let currentItems = [...props.items];
 
 	// Apply search
 	if (searchQuery.value) {
@@ -228,6 +298,27 @@ function sortBy(key: string) {
 	emit('update:sort', sortKey.value, sortDirection.value);
 }
 
+// Formatters
+function formatDate(date: string | Date): string {
+	if (!date) return '';
+	const dateObj = date instanceof Date ? date : new Date(date);
+	return dateObj.toLocaleDateString(undefined, {
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit'
+	});
+}
+
+function formatCurrency(value: number): string {
+	if (value === undefined || value === null) return '';
+	return new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD'
+	}).format(value);
+}
+
 watch(
 	() => props.items,
 	() => {
@@ -240,7 +331,9 @@ watch(
 // Apply sorting to filtered items
 watch([sortKey, sortDirection], () => {
 	if (sortKey.value) {
-		filteredItems.value.sort((a, b) => {
+		// Create a new array to avoid mutating the computed property directly
+		const itemsToSort = [...filteredItems.value];
+		itemsToSort.sort((a, b) => {
 			const aValue = a[sortKey.value];
 			const bValue = b[sortKey.value];
 
@@ -248,6 +341,8 @@ watch([sortKey, sortDirection], () => {
 			if (aValue > bValue) return sortDirection.value === 'asc' ? 1 : -1;
 			return 0;
 		});
+		// Replace the array contents without changing the reference
+		filteredItems.value.splice(0, filteredItems.value.length, ...itemsToSort);
 	}
 });
 </script>
@@ -255,5 +350,69 @@ watch([sortKey, sortDirection], () => {
 <style scoped>
 .cursor-pointer {
 	cursor: pointer;
+}
+
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.card-actions {
+	display: flex;
+	gap: var(--spacing-2);
+}
+
+.empty {
+	text-align: center;
+	padding: var(--spacing-6) 0;
+}
+
+.empty-icon {
+	margin-bottom: var(--spacing-4);
+	color: var(--color-neutral-400);
+}
+
+.empty-icon svg {
+	width: 3rem;
+	height: 3rem;
+	stroke-width: 1;
+}
+
+.empty-title {
+	font-size: var(--font-size-lg);
+	font-weight: var(--font-weight-medium);
+	margin-bottom: var(--spacing-2);
+}
+
+.empty-subtitle {
+	max-width: 20rem;
+	margin: 0 auto;
+}
+
+.table th {
+	font-weight: var(--font-weight-semibold);
+	color: var(--color-text);
+}
+
+.table th.cursor-pointer:hover {
+	background-color: var(--color-neutral-100);
+}
+
+.pagination .page-item.active .page-link {
+	background-color: var(--color-primary-500);
+	border-color: var(--color-primary-500);
+}
+
+.pagination .page-link {
+	color: var(--color-primary-500);
+}
+
+.pagination .page-link:hover {
+	background-color: var(--color-neutral-100);
+}
+
+.pagination .page-item.disabled .page-link {
+	color: var(--color-neutral-400);
 }
 </style>

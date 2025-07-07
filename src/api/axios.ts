@@ -1,9 +1,10 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios'
-import type { ApiResponse, ApiError, RefreshTokenResponse } from '@/types/api'
+import type { ApiResponse, ApiError } from '@/types/common'
+import type { RefreshTokenResponse } from '@/types/auth'
 import { TokenManager } from '@/utils/auth'
 import { logger } from '@/utils/logger'
+import type { AuthTokenExpiry } from '@/stores/auth'
 
-// Create axios instance with default configuration
 const axiosInstance = axios.create({
 	baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
 	timeout: parseInt(import.meta.env.VITE_API_TIMEOUT as string) || 10000,
@@ -11,18 +12,15 @@ const axiosInstance = axios.create({
 		'Content-Type': 'application/json',
 		'Accept': 'application/json'
 	},
-	// Enable CORS credentials if needed
 	withCredentials: false
 })
 
-// Flag to prevent multiple refresh attempts
 let isRefreshing = false
 let failedQueue: Array<{
 	resolve: (value?: any) => void
 	reject: (reason?: any) => void
 }> = []
 
-// Process queued requests after token refresh
 const processQueue = (error: any, token: string | null = null) => {
 	failedQueue.forEach(({ resolve, reject }) => {
 		if (error) {
@@ -43,18 +41,18 @@ const refreshAuthToken = async (): Promise<string | null> => {
 			throw new Error('No refresh token available')
 		}
 
-		const response = await axios.post<ApiResponse<RefreshTokenResponse>>(
+		const response = await axios.get<RefreshTokenResponse>(
 			`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
-			{ refreshToken },
 			{
+				data: { refreshToken },
 				headers: { 'Content-Type': 'application/json' },
 				timeout: 5000
 			}
 		)
 
-		if (response.data.success && response.data.data) {
-			TokenManager.storeRefreshResponse(response.data.data)
-			return response.data.data.accessToken
+		if (response.status === 200 && response.data) {
+			TokenManager.storeRefreshResponse(response.data as RefreshTokenResponse & { expiresIn?: AuthTokenExpiry })
+			return response.data.token
 		}
 
 		throw new Error('Failed to refresh token')
@@ -195,32 +193,32 @@ const createApiError = (error: AxiosError): ApiError => {
 // Utility functions for common HTTP methods
 export const api = {
 	// GET request
-	get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<ApiResponse<T>>> => {
+	get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.get(url, config)
 	},
 
 	// POST request
-	post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<ApiResponse<T>>> => {
+	post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.post(url, data, config)
 	},
 
 	// PUT request
-	put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<ApiResponse<T>>> => {
+	put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.put(url, data, config)
 	},
 
 	// PATCH request
-	patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<ApiResponse<T>>> => {
+	patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.patch(url, data, config)
 	},
 
 	// DELETE request
-	delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<ApiResponse<T>>> => {
+	delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.delete(url, config)
 	},
 
 	// Upload file
-	upload: <T = any>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<AxiosResponse<ApiResponse<T>>> => {
+	upload: <T = any>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.post(url, formData, {
 			...config,
 			headers: {
