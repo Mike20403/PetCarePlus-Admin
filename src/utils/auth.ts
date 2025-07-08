@@ -1,4 +1,5 @@
 import type { LoginResponse, RefreshTokenResponse } from "@/api"
+import type { UserInfo } from "@/types"
 
 // Token storage keys
 const TOKEN_KEY = 'auth_token'
@@ -66,7 +67,7 @@ export class TokenManager {
 	}
 
 	// Get user data
-	static getUser(): any | null {
+	static getUser(): UserInfo | null {
 		const userData = localStorage.getItem(USER_KEY);
 
 		if (!userData || userData === 'null' || userData === 'undefined') {
@@ -82,7 +83,7 @@ export class TokenManager {
 	}
 
 	// Set user data
-	static setUser(user: any): void {
+	static setUser(user: UserInfo): void {
 		localStorage.setItem(USER_KEY, JSON.stringify(user))
 	}
 

@@ -2,6 +2,7 @@ import type { LoginRequest, LoginResponse, RefreshTokenResponse } from '@/types/
 import { TokenManager } from '@/utils/auth'
 import { api } from './axios'
 import type { UserInfo } from '@/types'
+import type { ProfileUpdateRequest, JwtPayload } from '@/types/jwt'
 
 export class AuthService {
 	private static readonly BASE_URL = '/auth'
@@ -72,7 +73,7 @@ export class AuthService {
 	}
 
 	// Update user profile
-	static async updateProfile(profileData: any): Promise<UserInfo> {
+	static async updateProfile(profileData: ProfileUpdateRequest): Promise<UserInfo> {
 		const response = await api.put<UserInfo>(`${this.BASE_URL}/profile`, profileData)
 
 		if (response.data) {
@@ -101,12 +102,12 @@ export class AuthService {
 	}
 
 	// Get stored user data
-	static getCurrentUserData(): any | null {
+	static getCurrentUserData(): UserInfo | null {
 		return TokenManager.getUser()
 	}
 	
 	// Parse JWT token to get expiration time
-	static parseJwt(token: string): any {
+	static parseJwt(token: string): JwtPayload | null {
 		try {
 			const base64Url = token.split('.')[1];
 			const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');

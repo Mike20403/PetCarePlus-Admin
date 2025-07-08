@@ -3,6 +3,7 @@ import type { ApiResponse, ApiError } from '@/types/common'
 import type { AuthTokenExpiry, RefreshTokenResponse } from '@/types/auth'
 import { TokenManager } from '@/utils/auth'
 import { logger } from '@/utils/logger'
+import type { RefreshQueueItem } from '@/types/jwt'
 
 const axiosInstance = axios.create({
 	baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
@@ -15,12 +16,9 @@ const axiosInstance = axios.create({
 })
 
 let isRefreshing = false
-let failedQueue: Array<{
-	resolve: (value?: any) => void
-	reject: (reason?: any) => void
-}> = []
+let failedQueue: RefreshQueueItem[] = []
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
 	failedQueue.forEach(({ resolve, reject }) => {
 		if (error) {
 			reject(error)
@@ -165,10 +163,10 @@ const handleAuthenticationError = () => {
 const createApiError = (error: AxiosError): ApiError => {
 	if (error.response) {
 		// Server responded with error status
-		const responseData = error.response.data as any
+		const responseData = error.response.data as Record<string, unknown>
 		return {
-			message: responseData?.message || `HTTP Error ${error.response.status}`,
-			code: responseData?.code || error.response.status.toString(),
+			message: (responseData?.message as string) || `HTTP Error ${error.response.status}`,
+			code: (responseData?.code as string) || error.response.status.toString(),
 			status: error.response.status,
 			details: responseData
 		}
@@ -192,32 +190,32 @@ const createApiError = (error: AxiosError): ApiError => {
 // Utility functions for common HTTP methods
 export const api = {
 	// GET request
-	get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+	get: <T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.get(url, config)
 	},
 
 	// POST request
-	post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+	post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.post(url, data, config)
 	},
 
 	// PUT request
-	put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+	put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.put(url, data, config)
 	},
 
 	// PATCH request
-	patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+	patch: <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.patch(url, data, config)
 	},
 
 	// DELETE request
-	delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+	delete: <T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.delete(url, config)
 	},
 
 	// Upload file
-	upload: <T = any>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+	upload: <T>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
 		return axiosInstance.post(url, formData, {
 			...config,
 			headers: {

@@ -16,7 +16,7 @@ export interface ApiError {
 	message: string
 	code?: string
 	status?: number
-	details?: any
+	details?: unknown
 }
 
 // Request/Response pagination

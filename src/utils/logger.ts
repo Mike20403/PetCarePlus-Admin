@@ -1,3 +1,5 @@
+import type { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
+
 // Logger utility for API requests and responses
 export enum LogLevel {
 	DEBUG = 0,
@@ -35,7 +37,7 @@ class Logger {
 		return level >= this.level
 	}
 
-	private formatMessage(level: string, message: string, data?: any): void {
+	private formatMessage(level: string, message: string, data?: unknown): void {
 		const timestamp = new Date().toISOString()
 		const prefix = `[${timestamp}] [${level}]`
 
@@ -46,44 +48,44 @@ class Logger {
 		}
 	}
 
-	debug(message: string, data?: any): void {
+	debug(message: string, data?: unknown): void {
 		if (this.shouldLog(LogLevel.DEBUG)) {
 			this.formatMessage('DEBUG', message, data)
 		}
 	}
 
-	info(message: string, data?: any): void {
+	info(message: string, data?: unknown): void {
 		if (this.shouldLog(LogLevel.INFO)) {
 			this.formatMessage('INFO', message, data)
 		}
 	}
 
-	warn(message: string, data?: any): void {
+	warn(message: string, data?: unknown): void {
 		if (this.shouldLog(LogLevel.WARN)) {
 			this.formatMessage('WARN', message, data)
 		}
 	}
 
-	error(message: string, data?: any): void {
+	error(message: string, data?: unknown): void {
 		if (this.shouldLog(LogLevel.ERROR)) {
 			this.formatMessage('ERROR', message, data)
 		}
 	}
 
 	// API-specific logging methods
-	logRequest(config: any): void {
+	logRequest(config: AxiosRequestConfig): void {
 		if (this.isDevelopment && this.shouldLog(LogLevel.DEBUG)) {
 			this.debug('API Request', {
 				method: config.method?.toUpperCase(),
 				url: config.url,
 				params: config.params,
 				data: config.data,
-				headers: this.sanitizeHeaders(config.headers)
+				headers: this.sanitizeHeaders(config.headers as Record<string, unknown>)
 			})
 		}
 	}
 
-	logResponse(response: any): void {
+	logResponse(response: AxiosResponse<unknown>): void {
 		if (this.isDevelopment && this.shouldLog(LogLevel.DEBUG)) {
 			this.debug('API Response', {
 				status: response.status,
@@ -94,7 +96,7 @@ class Logger {
 		}
 	}
 
-	logError(error: any): void {
+	logError(error: AxiosError<unknown>): void {
 		if (this.shouldLog(LogLevel.ERROR)) {
 			this.error('API Error', {
 				message: error.message,
@@ -106,10 +108,10 @@ class Logger {
 		}
 	}
 
-	private sanitizeHeaders(headers: any): any {
-		if (!headers) return headers
+	private sanitizeHeaders(headers?: Record<string, unknown>): Record<string, unknown> {
+		if (!headers) return {}
 
-		const sanitized = { ...headers }
+		const sanitized = { ...headers } as Record<string, unknown>
 		// Remove sensitive headers from logs
 		if (sanitized.Authorization) {
 			sanitized.Authorization = 'Bearer ***'
