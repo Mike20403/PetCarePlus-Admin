@@ -1,7 +1,7 @@
 [build]
   publish = "dist"
-  command = "npm run build"
-  environment = { NODE_VERSION = "18" }
+  command = "pnpm run build"
+  environment = { NODE_VERSION = "20" }
 
 # Production context: all deploys from the main branch 
 # will inherit these settings
