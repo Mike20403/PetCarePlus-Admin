@@ -11,16 +11,15 @@ export { WithdrawalsService } from '@/api/withdrawals.service'
 
 // Re-export types for convenience from the new type files
 export type { ApiResponse, ApiError, PaginationParams, ListResponse, AppSettings } from '@/types/common'
-export type { LoginRequest, LoginResponse, UserInfo, AuthTokenExpiry, RefreshTokenResponse } from '@/types/auth'
+export type { LoginRequest, LoginResponse, AuthTokenExpiry, RefreshTokenResponse } from '@/types/auth'
 export type { Role, User, UserRequest } from '@/types/user'
-export type { Pet, Customer, Appointment, Booking, BookingPetService } from '@/types/booking'
+export type { Pet, Customer, Appointment, Booking } from '@/types/booking'
 export type { Service, ServiceRequest, ServicePatchRequest } from '@/types/service'
-export type { Term, TermsType, CreateTermsRequest, UpdateTermsRequest } from '@/types/term'
+export type { Term, CreateTermsRequest, UpdateTermsRequest } from '@/types/term'
 export type {
 	Withdrawal,
-	WithdrawalStatus,
 	WithdrawalRequest,
-	WithdrawalActionRequest
+	WithdrawalActionRequest,
 } from '@/types/withdrawal'
 
 // User service types

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Service } from '@/types/api'
-import { ServicesService } from '@/api'
+import { ServicesService, type Service } from '@/api'
 import { useToast } from '@/composables/useToast'
 
 export const useServicesStore = defineStore('services', () => {
@@ -12,14 +11,6 @@ export const useServicesStore = defineStore('services', () => {
   const { showToast } = useToast()
 
   const totalServices = computed(() => services.value.length)
-  
-  const activeServices = computed(() => 
-    services.value.filter(service => service.isActive)
-  )
-  
-  const inactiveServices = computed(() => 
-    services.value.filter(service => !service.isActive)
-  )
 
   async function fetchServices() {
     isLoading.value = true
@@ -27,7 +18,7 @@ export const useServicesStore = defineStore('services', () => {
     
     try {
       const response = await ServicesService.getServices()
-      services.value = response.data
+      services.value = response
     } catch (err) {
       error.value = 'Failed to fetch services'
       showToast('Failed to fetch services', 'error')
@@ -42,7 +33,7 @@ export const useServicesStore = defineStore('services', () => {
     error.value = null
     
     try {
-      const response = await ServicesService.getService(parseInt(id))
+      const response = await ServicesService.getService(id)
       selectedService.value = response
       return response
     } catch (err) {
@@ -74,15 +65,15 @@ export const useServicesStore = defineStore('services', () => {
     }
   }
 
-  async function updateService(id: string, serviceData: Partial<Service>) {
+  async function updateService(id: string, serviceData?: Partial<Service>) {
     isLoading.value = true
     error.value = null
     
     try {
-      const response = await ServicesService.updateService(parseInt(id), serviceData)
+      const response = await ServicesService.updateService(id, serviceData)
       
       // Update the service in the local state
-      const index = services.value.findIndex(service => service.id === parseInt(id))
+      const index = services.value.findIndex(service => service.id === id)
       if (index !== -1) {
         services.value[index] = response
       }
@@ -99,8 +90,8 @@ export const useServicesStore = defineStore('services', () => {
     }
   }
 
-  async function toggleServiceStatus(id: string, isActive: boolean) {
-    return updateService(id, { isActive })
+  async function toggleServiceStatus(id: string) {
+    return updateService(id)
   }
 
   async function deleteService(id: string) {
@@ -108,10 +99,10 @@ export const useServicesStore = defineStore('services', () => {
     error.value = null
     
     try {
-      await ServicesService.deleteService(parseInt(id))
+      await ServicesService.deleteService(id)
       
       // Remove the service from the local state
-      services.value = services.value.filter(service => service.id !== parseInt(id))
+      services.value = services.value.filter(service => service.id !== id)
       
       showToast('Service deleted successfully', 'success')
       return true
@@ -131,8 +122,6 @@ export const useServicesStore = defineStore('services', () => {
     error,
     selectedService,
     totalServices,
-    activeServices,
-    inactiveServices,
     fetchServices,
     fetchServiceById,
     createService,

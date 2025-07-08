@@ -1,4 +1,4 @@
-import type { LoginResponse, RefreshTokenResponse } from '@/types/api'
+import type { LoginResponse, RefreshTokenResponse } from "@/api"
 
 // Token storage keys
 const TOKEN_KEY = 'auth_token'

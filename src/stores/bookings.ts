@@ -46,7 +46,7 @@ export const useBookingsStore = defineStore('bookings', () => {
     error.value = null
     
     try {
-      const response = await BookingsService.getBooking(parseInt(id))
+      const response = await BookingsService.getBooking(id)
       selectedBooking.value = response
       return response
     } catch (err) {
@@ -64,10 +64,10 @@ export const useBookingsStore = defineStore('bookings', () => {
     error.value = null
     
     try {
-      const response = await BookingsService.changeBookingStatus(parseInt(id), status)
+      const response = await BookingsService.changeBookingStatus(id, status)
       
       // Update the booking in the local state
-      const index = bookings.value.findIndex(booking => booking.id === parseInt(id))
+      const index = bookings.value.findIndex(booking => booking.id === id)
       if (index !== -1) {
         bookings.value[index] = response
       }
@@ -89,10 +89,10 @@ export const useBookingsStore = defineStore('bookings', () => {
     error.value = null
     
     try {
-      await BookingsService.deleteBooking(parseInt(id))
+      await BookingsService.deleteBooking(id)
       
       // Remove the booking from the local state
-      bookings.value = bookings.value.filter(booking => booking.id !== parseInt(id))
+      bookings.value = bookings.value.filter(booking => booking.id !== id)
       
       showToast('Booking deleted successfully', 'success')
       return true

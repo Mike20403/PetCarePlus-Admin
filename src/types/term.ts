@@ -1,5 +1,10 @@
 // Term Types
-export type TermsType = 'USER_TERMS' | 'PRIVACY_POLICY' | 'REFUND_POLICY' | 'OTHER';
+export enum TermsType {
+	USER_TERMS = 'USER_TERMS',
+	PRIVACY_POLICY = 'PRIVACY_POLICY',
+	REFUND_POLICY = 'REFUND_POLICY',
+	OTHER = 'OTHER'
+}
 
 export interface Term {
 	id: string;

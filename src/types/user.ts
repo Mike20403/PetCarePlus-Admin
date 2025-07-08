@@ -28,3 +28,17 @@ export interface UserRequest {
 	password?: string
 	roleId: number
 }
+
+export interface UserInfo {
+	id: string
+	email: string
+	name: string
+	lastName: string
+	phoneNumber: string
+	role: string
+	emailVerifiedAt: string | null
+	blockedAt: string | null
+	createdAt: string
+	updatedAt: string
+	deletedAt: string | null
+}

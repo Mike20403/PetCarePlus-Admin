@@ -2,7 +2,7 @@
 	<div class="mb-3">
 		<label :for="name" class="form-label">{{ label }}</label>
 		<input :type="type" :name="name" :id="name" :placeholder="placeholder" :value="modelValue"
-			@input="$emit('update:modelValue', $event.target.value)" class="form-control"
+			@input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)" class="form-control"
 			:class="{ 'is-invalid': error }" />
 		<div v-if="error" class="invalid-feedback">
 			{{ error }}

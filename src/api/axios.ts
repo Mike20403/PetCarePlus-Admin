@@ -1,9 +1,8 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios'
 import type { ApiResponse, ApiError } from '@/types/common'
-import type { RefreshTokenResponse } from '@/types/auth'
+import type { AuthTokenExpiry, RefreshTokenResponse } from '@/types/auth'
 import { TokenManager } from '@/utils/auth'
 import { logger } from '@/utils/logger'
-import type { AuthTokenExpiry } from '@/stores/auth'
 
 const axiosInstance = axios.create({
 	baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',

@@ -12,7 +12,7 @@ export function useServices() {
     error.value = null
     try {
       const res = await ServicesService.getServices(page, size, sortBy, sort)
-      services.value = res.data || []
+      services.value = res || []
     } catch (e: any) {
       error.value = e.message || 'Failed to fetch services'
     } finally {

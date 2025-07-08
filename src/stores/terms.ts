@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Term } from '@/types/api'
-import { TermsService } from '@/api'
+import { TermsService, type Term } from '@/api'
 import { useToast } from '@/composables/useToast'
+import { TermsType } from '@/types'
 
 export const useTermsStore = defineStore('terms', () => {
   const terms = ref<Term[]>([])
@@ -23,10 +23,10 @@ export const useTermsStore = defineStore('terms', () => {
   
   const termsByType = computed(() => {
     const result: Record<Term['type'], Term[]> = {
-      'terms': [],
-      'privacy': [],
-      'refund': [],
-      'other': []
+      [TermsType.USER_TERMS]: [],
+      [TermsType.PRIVACY_POLICY]: [],
+      [TermsType.REFUND_POLICY]: [],
+      [TermsType.OTHER]: []
     }
     
     terms.value.forEach(term => {
@@ -42,7 +42,7 @@ export const useTermsStore = defineStore('terms', () => {
     
     try {
       const response = await TermsService.getTerms()
-      terms.value = response.data
+      terms.value = response
     } catch (err) {
       error.value = 'Failed to fetch terms'
       showToast('Failed to fetch terms', 'error')
@@ -57,7 +57,7 @@ export const useTermsStore = defineStore('terms', () => {
     error.value = null
     
     try {
-      const response = await TermsService.getTerm(parseInt(id))
+      const response = await TermsService.getTerm(id)
       selectedTerm.value = response
       return response
     } catch (err) {
@@ -94,10 +94,10 @@ export const useTermsStore = defineStore('terms', () => {
     error.value = null
     
     try {
-      const response = await TermsService.updateTerm(parseInt(id), termData)
+      const response = await TermsService.updateTerm(id, termData)
       
       // Update the term in the local state
-      const index = terms.value.findIndex(term => term.id === parseInt(id))
+      const index = terms.value.findIndex(term => term.id === id)
       if (index !== -1) {
         terms.value[index] = response
       }
@@ -123,10 +123,10 @@ export const useTermsStore = defineStore('terms', () => {
     error.value = null
     
     try {
-      await TermsService.deleteTerm(parseInt(id))
+      await TermsService.deleteTerm(id)
       
       // Remove the term from the local state
-      terms.value = terms.value.filter(term => term.id !== parseInt(id))
+      terms.value = terms.value.filter(term => term.id !== id)
       
       showToast('Term deleted successfully', 'success')
       return true

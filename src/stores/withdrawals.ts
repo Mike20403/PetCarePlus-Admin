@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Withdrawal } from '@/types/api'
-import { WithdrawalsService } from '@/api'
+import { WithdrawalsService, type Withdrawal } from '@/api'
 import { useToast } from '@/composables/useToast'
+import { WithdrawalStatus } from '@/types'
 
 export const useWithdrawalsStore = defineStore('withdrawals', () => {
   const withdrawals = ref<Withdrawal[]>([])
@@ -14,15 +14,15 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
   const totalWithdrawals = computed(() => withdrawals.value.length)
   
   const pendingWithdrawals = computed(() => 
-    withdrawals.value.filter(withdrawal => withdrawal.status === 'pending')
+    withdrawals.value.filter(withdrawal => withdrawal.status === WithdrawalStatus.PENDING)
   )
   
   const approvedWithdrawals = computed(() => 
-    withdrawals.value.filter(withdrawal => withdrawal.status === 'approved')
+    withdrawals.value.filter(withdrawal => withdrawal.status === WithdrawalStatus.APPROVED)
   )
   
   const rejectedWithdrawals = computed(() => 
-    withdrawals.value.filter(withdrawal => withdrawal.status === 'rejected')
+    withdrawals.value.filter(withdrawal => withdrawal.status === WithdrawalStatus.REJECTED)
   )
   
   const totalPendingAmount = computed(() => 
@@ -39,7 +39,7 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     
     try {
       const response = await WithdrawalsService.getWithdrawals()
-      withdrawals.value = response.data
+      withdrawals.value = response
     } catch (err) {
       error.value = 'Failed to fetch withdrawals'
       showToast('Failed to fetch withdrawals', 'error')
@@ -54,7 +54,7 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     error.value = null
     
     try {
-      const response = await WithdrawalsService.getWithdrawal(parseInt(id))
+      const response = await WithdrawalsService.getWithdrawalById(id)
       selectedWithdrawal.value = response
       return response
     } catch (err) {
@@ -73,12 +73,12 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     
     try {
       const response = await WithdrawalsService.approveWithdrawal(
-        parseInt(id),
+        id,
         notes
       )
       
       // Update the withdrawal in the local state
-      const index = withdrawals.value.findIndex(withdrawal => withdrawal.id === parseInt(id))
+      const index = withdrawals.value.findIndex(withdrawal => withdrawal.id === id)
       if (index !== -1) {
         withdrawals.value[index] = response
       }
@@ -101,12 +101,12 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     
     try {
       const response = await WithdrawalsService.rejectWithdrawal(
-        parseInt(id),
+        id,
         notes || 'Rejected by admin'
       )
       
       // Update the withdrawal in the local state
-      const index = withdrawals.value.findIndex(withdrawal => withdrawal.id === parseInt(id))
+      const index = withdrawals.value.findIndex(withdrawal => withdrawal.id === id)
       if (index !== -1) {
         withdrawals.value[index] = response
       }
@@ -123,13 +123,13 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     }
   }
 
-  async function fetchWithdrawalsByUser(userId: number) {
+  async function fetchWithdrawalsByUser(userId: string) {
     isLoading.value = true
     error.value = null
     
     try {
       const response = await WithdrawalsService.getWithdrawalsByUser(userId)
-      return response.data
+      return response
     } catch (err) {
       error.value = 'Failed to fetch user withdrawals'
       showToast('Failed to fetch user withdrawals', 'error')
@@ -146,7 +146,7 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     
     try {
       const response = await WithdrawalsService.getWithdrawalsByStatus(status)
-      return response.data
+      return response
     } catch (err) {
       error.value = `Failed to fetch ${status} withdrawals`
       showToast(`Failed to fetch ${status} withdrawals`, 'error')

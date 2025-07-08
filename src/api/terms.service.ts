@@ -8,7 +8,7 @@ export class TermsService {
 	/**
 	 * Get all terms for a specific language
 	 */
-	static async getAllTerms(language: string = 'en'): Promise<Term[]> {
+	static async getTerms(language: string = 'en'): Promise<Term[]> {
 		const response = await api.get<ApiResponse<Term[]>>(this.BASE_URL, {
 			params: { language }
 		})
@@ -20,10 +20,15 @@ export class TermsService {
 		throw new Error(response.data.message || 'Failed to get terms')
 	}
 
+	static async getTerm(id: string): Promise<Term> {
+		const response = await api.get<ApiResponse<Term>>(`${this.BASE_URL}/${id}`)
+		return response.data.data
+	}
+
 	/**
 	 * Get all terms for all languages
 	 */
-	static async getAllTermsAllLanguages(): Promise<Term[]> {
+	static async getTermsAllLanguages(): Promise<Term[]> {
 		const response = await api.get<ApiResponse<Term[]>>(`${this.BASE_URL}/all-languages`)
 		
 		if (response.data.success && response.data.data) {
@@ -72,5 +77,14 @@ export class TermsService {
 		}
 		
 		throw new Error(response.data.message || 'Failed to update term')
+	}
+
+	static async getLatestTermByType(type: TermsType): Promise<Term> {
+		const response = await api.get<ApiResponse<Term>>(`${this.BASE_URL}/latest/${type}`)
+		return response.data.data
+	}
+
+	static async deleteTerm(id: string): Promise<void> {
+		await api.delete<ApiResponse<void>>(`${this.BASE_URL}/${id}`)
 	}
 }

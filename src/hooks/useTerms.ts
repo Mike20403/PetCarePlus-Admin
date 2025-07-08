@@ -11,7 +11,7 @@ export function useTerms() {
     loading.value = true
     error.value = null
     try {
-      terms.value = await TermsService.getAllTerms(language)
+      terms.value = await TermsService.getTerms(language)
     } catch (e: any) {
       error.value = e.message || 'Failed to fetch terms'
     } finally {

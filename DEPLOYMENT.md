@@ -25,9 +25,10 @@ The following files have been created to facilitate deployment:
    - Select your PetCarePlus-Admin repository
 
 3. **Configure Build Settings**
-   - Build command: `npm run build`
+   - Build command: `pnpm run build`
    - Publish directory: `dist`
    - Netlify will automatically detect the `netlify.toml` file and use its settings
+   - Make sure Node.js 20 is selected in the build settings
 
 4. **Add Environment Variables**
    - Add any sensitive environment variables that aren't included in the `netlify.toml` file
@@ -137,22 +138,34 @@ If you want to use a custom domain:
 
 If you encounter issues with the deployment:
 
-1. **Check Build Logs**
+1. **Package Manager Issues**
+   - The project uses pnpm as the package manager
+   - Ensure you're using pnpm for local development and testing
+   - The GitHub Actions workflow and netlify.toml are configured to use pnpm
+   - If switching from npm, run `pnpm install` to generate a proper pnpm-lock.yaml file
+
+2. **Node.js Version Compatibility**
+   - The project requires Node.js 20 or higher due to dependencies like @tabler/core
+   - Both GitHub Actions and Netlify are configured to use Node.js 20
+   - If deploying manually, ensure your Netlify site is configured to use Node.js 20
+
+3. **Check Build Logs**
    - Review the build logs in Netlify or GitHub Actions for errors
    - Ensure all dependencies are correctly specified in `package.json`
    - Look for type checking or linting errors that might be preventing the build
 
-2. **SPA Routing Issues**
+4. **SPA Routing Issues**
    - Verify the `_redirects` file is in the `public` directory
    - Check that the `_redirects` file is being copied to the `dist` directory during build
    - Confirm the `netlify.toml` file has the correct redirects configuration
 
-3. **Environment Variable Issues**
+5. **Environment Variable Issues**
    - Ensure all required environment variables are set
    - Verify they are being accessed correctly in your code with `import.meta.env.VITE_VARIABLE_NAME`
    - Check that GitHub Secrets are properly configured for the workflow
+   - The VITE_API_BASE_URL variable is critical for API connections
 
-4. **Caching Issues**
+6. **Caching Issues**
    - If you encounter issues with stale dependencies, you can manually clear the GitHub Actions cache
    - In GitHub, go to your repository → Actions → Caches in the left sidebar
 

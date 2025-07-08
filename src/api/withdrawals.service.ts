@@ -1,5 +1,5 @@
 import { api } from './axios'
-import type { Withdrawal } from '@/types/withdrawal'
+import type { Withdrawal, WithdrawalStatus } from '@/types/withdrawal'
 import type { ApiResponse } from '@/types/common'
 
 export class WithdrawalsService {
@@ -8,10 +8,15 @@ export class WithdrawalsService {
 	/**
 	 * Get all withdrawals with pagination
 	 */
-	static async getWithdrawals(page: number = 1, size: number = 10): Promise<ApiResponse<Withdrawal[]>> {
+	static async getWithdrawals(page: number = 1, size: number = 10): Promise<Withdrawal[]> {
 		const response = await api.get(this.BASE_URL, {
 			params: { page, size }
 		})
+		return response.data
+	}
+
+	static async getWithdrawalById(id: string): Promise<Withdrawal> {
+		const response = await api.get(`${this.BASE_URL}/${id}`)
 		return response.data
 	}
 
@@ -61,5 +66,15 @@ export class WithdrawalsService {
 		}
 		
 		throw new Error(response.data.message || 'Failed to complete withdrawal')
+	}
+
+	static async getWithdrawalsByUser(userId: string): Promise<Withdrawal[]> {
+		const response = await api.get(`${this.BASE_URL}/user/${userId}`)
+		return response.data
+	}
+
+	static async getWithdrawalsByStatus(status: WithdrawalStatus): Promise<Withdrawal[]> {
+		const response = await api.get(`${this.BASE_URL}/status/${status}`)
+		return response.data
 	}
 }

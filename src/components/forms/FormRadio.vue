@@ -4,7 +4,7 @@
 		<div v-for="option in options" :key="option.value" class="form-check">
 			<input class="form-check-input" type="radio" :name="name" :id="`${name}-${option.value}`"
 				:value="option.value" :checked="modelValue === option.value"
-				@change="$emit('update:modelValue', $event.target.value)" />
+				@change="$emit('update:modelValue', ($event.target as HTMLInputElement).value)" />
 			<label class="form-check-label" :for="`${name}-${option.value}`">
 				{{ option.text }}
 			</label>
@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, type PropType } from 'vue'
 
 interface RadioOption {
 	value: string | number

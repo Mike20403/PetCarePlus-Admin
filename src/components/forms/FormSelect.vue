@@ -1,7 +1,7 @@
 <template>
 	<div class="mb-3">
 		<label :for="name" class="form-label">{{ label }}</label>
-		<select :name="name" :id="name" :value="modelValue" @change="$emit('update:modelValue', $event.target.value)"
+		<select :name="name" :id="name" :value="modelValue" @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
 			class="form-select" :class="{ 'is-invalid': error }">
 			<option v-if="placeholder" value="" disabled selected>{{ placeholder }}</option>
 			<option v-for="option in options" :key="option.value" :value="option.value">

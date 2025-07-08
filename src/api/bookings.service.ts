@@ -48,4 +48,13 @@ export class BookingsService {
 		
 		throw new Error(response.data.message || 'Failed to get booking')
 	}
+
+	static async deleteBooking(id: string): Promise<void> {
+		await api.delete<ApiResponse<void>>(`${this.BASE_URL}/${id}`)
+	}
+
+	static async changeBookingStatus(id: string, status: Booking['status']): Promise<Booking> {
+		const response = await api.put<ApiResponse<Booking>>(`${this.BASE_URL}/${id}/status`, { status })
+		return response.data.data
+	}
 }

@@ -1,5 +1,10 @@
 // Withdrawal Types
-export type WithdrawalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+export enum WithdrawalStatus {
+	PENDING = 'PENDING',
+	APPROVED = 'APPROVED',
+	REJECTED = 'REJECTED',
+	COMPLETED = 'COMPLETED'
+}
 
 export interface Withdrawal {
 	id: string;

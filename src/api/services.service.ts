@@ -19,7 +19,7 @@ export class ServicesService {
 		size: number = 10,
 		sortBy?: string,
 		sort: 'asc' | 'desc' = 'asc'
-	): Promise<ApiResponse<Service[]>> {
+	): Promise<Service[]> {
 		const params = {
 			page,
 			size,
@@ -60,7 +60,7 @@ export class ServicesService {
 	/**
 	 * Update an existing service
 	 */
-	static async updateService(id: string, serviceData: ServicePatchRequest): Promise<Service> {
+	static async updateService(id: string, serviceData?: ServicePatchRequest): Promise<Service> {
 		const response = await api.patch<ApiResponse<Service>>(`${this.BASE_URL}/${id}`, serviceData)
 		
 		if (response.data.success && response.data.data) {
@@ -90,7 +90,7 @@ export class ServicesService {
 		size: number = 10,
 		sortBy?: string,
 		sort: 'asc' | 'desc' = 'asc'
-	): Promise<ApiResponse<Service[]>> {
+	): Promise<Service[]> {
 		const params = {
 			...criteria,
 			page,

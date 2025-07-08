@@ -1,6 +1,6 @@
 import { api } from './axios'
 import type { ApiResponse } from '@/types/common'
-import type { ListUserResponse, User, User } from '@/types/user'
+import type { ListUserResponse, User } from '@/types/user'
 
 export interface UserCriteria {
   roles?: string[];

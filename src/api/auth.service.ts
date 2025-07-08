@@ -1,6 +1,7 @@
-import type { LoginRequest, LoginResponse, RefreshTokenResponse, UserInfo } from '@/types/auth'
+import type { LoginRequest, LoginResponse, RefreshTokenResponse } from '@/types/auth'
 import { TokenManager } from '@/utils/auth'
 import { api } from './axios'
+import type { UserInfo } from '@/types'
 
 export class AuthService {
 	private static readonly BASE_URL = '/auth'
