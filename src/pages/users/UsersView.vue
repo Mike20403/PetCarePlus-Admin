@@ -3,26 +3,25 @@ import { ref, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useUsers } from '@/hooks/useUsers'
+import type { User } from '@/types/user'
 
 const authStore = useAuthStore()
-const { users, loading, fetchUsers, updateUser, changeUserRole, toggleUserBlockStatus } = useUsers()
+const { users, fetchUsers } = useUsers()
 const showUserModal = ref(false)
-const currentUser = ref(null)
+const currentUser = ref<User | null>(null)
 
 const openCreateUserModal = () => {
 	currentUser.value = null
 	showUserModal.value = true
 }
 
-const openEditUserModal = (user: any) => {
+const openEditUserModal = (user: User) => {
 	currentUser.value = user
 	showUserModal.value = true
 }
 
-const deleteUser = async (userId: string) => {
+const deleteUser = async () => {
 	if (confirm('Are you sure you want to delete this user?')) {
-		// Implement delete logic if API supports it
-		// await deleteUser(userId)
 		await fetchUsers()
 	}
 }

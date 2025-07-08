@@ -13,8 +13,8 @@ export function useBookings() {
     try {
       const res = await BookingsService.getBookings(page, size, sortBy, sort, criteria)
       bookings.value = res.data || []
-    } catch (e: any) {
-      error.value = e.message || 'Failed to fetch bookings'
+    } catch (e) {
+      error.value = (e as { message: string}).message || 'Failed to fetch bookings'
     } finally {
       loading.value = false
     }

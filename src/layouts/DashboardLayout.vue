@@ -1,7 +1,7 @@
 <template>
   <div class="page">
-    <Header />
-    <Sidebar />
+    <AppHeader />
+    <AppSidebar />
     <div class="page-wrapper" :style="{ marginLeft: sidebarStore.sidebarWidth + 'px' }">
       <div class="page-body">
         <div class="container-xl">
@@ -30,8 +30,8 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import Header from '@/components/Header.vue'
-import Sidebar from '@/components/Sidebar.vue'
+import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import { useSidebarStore } from '@/stores/sidebar'
 
 defineProps({

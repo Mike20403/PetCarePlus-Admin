@@ -133,12 +133,20 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import { useAuthStore } from '@/stores/auth'
 
-const authStore = useAuthStore()
+interface Withdrawal {
+	id: number;
+	userName: string;
+	amount: number;
+	status: 'Pending' | 'Approved' | 'Rejected';
+	requestDate: string;
+	paymentMethod: string;
+	accountNumber: string;
+	notes: string;
+}
 
-// Simplified mock data structure
-const withdrawals = ref([
+
+const withdrawals = ref<Withdrawal[]>([
 	{
 		id: 1,
 		userName: 'John Doe',
@@ -171,11 +179,10 @@ const withdrawals = ref([
 	}
 ])
 
-const loading = ref(false)
 const showWithdrawalModal = ref(false)
-const currentWithdrawal = ref(null)
+const currentWithdrawal = ref<Withdrawal | null>(null)
 
-const openWithdrawalDetails = (withdrawal: any) => {
+const openWithdrawalDetails = (withdrawal: Withdrawal) => {
 	currentWithdrawal.value = withdrawal
 	showWithdrawalModal.value = true
 }

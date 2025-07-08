@@ -1,4 +1,4 @@
-import axios from './axios';
+import axios, { type AxiosError } from 'axios';
 import type { ApiResponse } from '@/types/common';
 
 export interface AppSettings {
@@ -15,8 +15,13 @@ export const settingsService = {
 		try {
 			const response = await axios.get<ApiResponse<AppSettings>>(`/api/settings`);
 			return response.data;
-		} catch (error: any) {
-			return { success: false, message: error.response?.data?.message || 'Failed to fetch settings', data: {} as AppSettings };
+		} catch (error: unknown) {
+			const axiosError = error as AxiosError;
+			return {
+				success: false,
+				message: (axiosError.response?.data as { message: string })?.message || 'Failed to fetch settings',
+				data: {} as AppSettings
+			};
 		}
 	},
 
@@ -24,8 +29,13 @@ export const settingsService = {
 		try {
 			const response = await axios.put<ApiResponse<AppSettings>>(`/api/settings`, settings);
 			return response.data;
-		} catch (error: any) {
-			return { success: false, message: error.response?.data?.message || 'Failed to update settings', data: {} as AppSettings };
+		} catch (error: unknown) {
+			const axiosError = error as AxiosError;
+			return {
+				success: false,
+				message: (axiosError.response?.data as { message: string })?.message || 'Failed to update settings',
+				data: {} as AppSettings
+			};
 		}
 	},
 };

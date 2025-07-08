@@ -149,30 +149,25 @@ import { ref, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useTerms } from '@/hooks/useTerms'
+import type { Term } from '@/types/term'
 
 const authStore = useAuthStore()
-const { terms, loading, fetchTerms, createTerm, updateTerm, getTermsByType } = useTerms()
+const { terms, fetchTerms } = useTerms()
 const showTermModal = ref(false)
-const currentTerm = ref(null)
+const currentTerm = ref<Term | null>(null)
 
 const openCreateTermModal = () => {
 	currentTerm.value = null
 	showTermModal.value = true
 }
 
-const openEditTermModal = (term: any) => {
+const openEditTermModal = (term: Term) => {
 	currentTerm.value = term
 	showTermModal.value = true
 }
 
-const toggleTermStatus = async (termId: string) => {
-	// Implement status toggle logic if API supports it
-	await fetchTerms()
-}
-
-const deleteTerm = async (termId: string) => {
+const deleteTerm = async () => {
 	if (confirm('Are you sure you want to delete this document?')) {
-		// Implement delete logic if API supports it
 		await fetchTerms()
 	}
 }

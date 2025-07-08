@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import { useAuthStore } from '@/stores/auth'
-
-const authStore = useAuthStore()
 
 const settings = ref({
 	appName: 'PetCare+ Admin',
@@ -18,7 +15,6 @@ const settings = ref({
 	maintenanceMode: false
 })
 
-const loading = ref(false)
 const saving = ref(false)
 
 const saveGeneralSettings = async () => {

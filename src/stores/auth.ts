@@ -98,7 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
 			const response = await AuthService.refreshToken()
 			setTokens(response)
 			return true
-		} catch (error) {
+		} catch {
 			clearAuthData()
 			return false
 		}

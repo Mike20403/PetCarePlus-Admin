@@ -127,25 +127,21 @@ import { ref, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useServices } from '@/hooks/useServices'
+import type { Service } from '@/types/service'
 
 const authStore = useAuthStore()
-const { services, loading, fetchServices, createService, updateService, deleteService } = useServices()
+const { services, fetchServices, deleteService } = useServices()
 const showServiceModal = ref(false)
-const currentService = ref(null)
+const currentService = ref<Service | null>(null)
 
 const openCreateServiceModal = () => {
 	currentService.value = null
 	showServiceModal.value = true
 }
 
-const openEditServiceModal = (service: any) => {
+const openEditServiceModal = (service: Service) => {
 	currentService.value = service
 	showServiceModal.value = true
-}
-
-const toggleServiceStatus = async (serviceId: string) => {
-	// Implement status toggle logic if API supports it
-	await fetchServices()
 }
 
 const deleteServiceHandler = async (serviceId: string) => {

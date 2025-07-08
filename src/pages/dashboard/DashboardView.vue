@@ -385,9 +385,6 @@ const stats = ref({
 	providers: 0
 })
 
-const recentBookings = ref([])
-const topServices = ref([])
-
 onMounted(async () => {
 	await loadDashboardData()
 	initializeCharts()
@@ -396,23 +393,20 @@ onMounted(async () => {
 async function loadDashboardData() {
 	try {
 		const response = await getDashboardStats()
-		// Map the response to our stats structure
 		stats.value = {
 			revenue: response.monthlyRevenue || 4300,
 			bookings: response.totalAppointments || 84,
 			users: response.totalCustomers || 1352,
-			providers: 145 // This might not be in the response, using static value
+			providers: 145
 		}
-		// For now, using static data for recent bookings and top services
-		// These would come from additional API calls in a real implementation
+
 	} catch (error) {
 		console.error('Failed to load dashboard data:', error)
 	}
 }
 
 function initializeCharts() {
-	// Initialize charts here using a charting library like ApexCharts
-	// This is a placeholder for chart initialization
+
 }
 </script>
 

@@ -102,7 +102,7 @@
                             </svg>
                             Edit Booking
                           </a>
-                          <a class="dropdown-item text-danger" href="#" @click.prevent="deleteBooking(booking.id)">
+                          <a class="dropdown-item text-danger" href="#" @click.prevent="deleteBooking()">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                               <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                               <path d="M4 7l16 0" />
@@ -156,30 +156,24 @@ import { ref, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useBookings } from '@/hooks/useBookings'
+import type { Booking } from '@/types'
 
 const authStore = useAuthStore()
-const { bookings, loading, fetchBookings, getBooking } = useBookings()
+const { bookings, fetchBookings } = useBookings()
 const showBookingModal = ref(false)
-const currentBooking = ref(null)
+const currentBooking = ref<Booking | null>(null)
 
 const openCreateBookingModal = () => {
 	currentBooking.value = null
 	showBookingModal.value = true
 }
 
-const openEditBookingModal = (booking: any) => {
+const openEditBookingModal = (booking: Booking | null) => {
 	currentBooking.value = booking
 	showBookingModal.value = true
 }
 
-const updateBookingStatus = async (bookingId: string, newStatus: string) => {
-	if (confirm(`Are you sure you want to change this booking to ${newStatus}?`)) {
-		// Implement status update logic if API supports it
-		await fetchBookings()
-	}
-}
-
-const deleteBooking = async (bookingId: string) => {
+const deleteBooking = async () => {
 	if (confirm('Are you sure you want to delete this booking?')) {
 		// Implement delete logic if API supports it
 		await fetchBookings()

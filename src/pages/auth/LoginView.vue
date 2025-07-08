@@ -24,8 +24,8 @@ async function submit() {
 		} else {
 			errorMessage.value = "Login failed: No token received."
 		}
-	} catch (error: any) {
-		errorMessage.value = error.message || "An unexpected error occurred during login."
+	} catch (error) {
+		errorMessage.value = (error as { message: string }).message || "An unexpected error occurred during login."
 	} finally {
 		loading.value = false
 	}

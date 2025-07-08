@@ -43,7 +43,7 @@ export class UserService {
       sort
     }
 
-    const response = await api.get(this.BASE_URL, { params })
+    const response = await api.get<ApiResponse<ListUserResponse>>(this.BASE_URL, { params })
     return response.data
   }
 
@@ -109,7 +109,7 @@ export class UserService {
 
 // For backward compatibility
 export const userService = {
-  getAllUsers(params?: any) {
+  getAllUsers(params?: UserCriteria) {
     return UserService.getUsers(params);
   },
   getUserById(id: string) {

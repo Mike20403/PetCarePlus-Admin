@@ -13,8 +13,8 @@ export function useServices() {
     try {
       const res = await ServicesService.getServices(page, size, sortBy, sort)
       services.value = res || []
-    } catch (e: any) {
-      error.value = e.message || 'Failed to fetch services'
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Failed to fetch services'
     } finally {
       loading.value = false
     }

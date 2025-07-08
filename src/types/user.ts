@@ -20,7 +20,7 @@ export interface User {
 	deletedAt: string | null
 }
 
-export interface ListUserResponse extends PaginationResponse<User> {}
+export type ListUserResponse = PaginationResponse<User>
 
 export interface UserRequest {
 	name: string

@@ -215,9 +215,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import { useAuthStore } from '@/stores/auth'
 
-const authStore = useAuthStore()
 
 const profile = ref({
 	firstName: 'Admin',
@@ -243,7 +241,6 @@ const security = ref({
 	confirmPassword: ''
 })
 
-const loading = ref(false)
 const saving = ref(false)
 const passwordChanging = ref(false)
 

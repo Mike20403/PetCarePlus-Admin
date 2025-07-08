@@ -15,14 +15,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
-
 interface SelectOption {
 	value: string | number;
 	text: string;
 }
 
-const props = defineProps({
+defineProps({
 	label: {
 		type: String,
 		required: true,
@@ -49,7 +47,7 @@ const props = defineProps({
 	},
 });
 
-const emit = defineEmits(['update:modelValue']);
+defineEmits(['update:modelValue']);
 </script>
 
 <style scoped>

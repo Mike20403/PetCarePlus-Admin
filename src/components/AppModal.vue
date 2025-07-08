@@ -19,20 +19,15 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+// Using destructuring to avoid unused variable warnings
+const { isOpen = false, title = '' } = defineProps<{
+	isOpen?: boolean;
+	title?: string;
+}>();
 
-const props = defineProps({
-	isOpen: {
-		type: Boolean,
-		default: false,
-	},
-	title: {
-		type: String,
-		default: '',
-	},
-});
-
-const emit = defineEmits(['close']);
+const emit = defineEmits<{
+	(e: 'close'): void;
+}>();
 
 const closeModal = () => {
 	emit('close');

@@ -1,41 +1,34 @@
 <template>
-	<Modal :is-open="isOpen" :title="title" @close="cancel">
+	<AppModal :is-open="isOpen" :title="title" @close="cancel">
 		<p>{{ message }}</p>
 		<template #footer>
 			<button type="button" class="btn btn-link link-secondary" @click="cancel">{{ cancelText }}</button>
 			<button type="button" class="btn btn-primary ms-auto" @click="confirm">{{ confirmText }}</button>
 		</template>
-	</Modal>
+	</AppModal>
 </template>
 
 <script setup lang="ts">
-import Modal from './Modal.vue';
-import { defineProps, defineEmits } from 'vue';
+import AppModal from './AppModal.vue';
 
-const props = defineProps({
-	isOpen: {
-		type: Boolean,
-		default: false,
-	},
-	title: {
-		type: String,
-		default: 'Confirm Action',
-	},
-	message: {
-		type: String,
-		default: 'Are you sure you want to perform this action?',
-	},
-	confirmText: {
-		type: String,
-		default: 'Confirm',
-	},
-	cancelText: {
-		type: String,
-		default: 'Cancel',
-	},
-});
+const { 
+	isOpen = false, 
+	title = 'Confirm Action', 
+	message = 'Are you sure you want to perform this action?',
+	confirmText = 'Confirm',
+	cancelText = 'Cancel'
+} = defineProps<{
+	isOpen?: boolean;
+	title?: string;
+	message?: string;
+	confirmText?: string;
+	cancelText?: string;
+}>();
 
-const emit = defineEmits(['confirm', 'cancel']);
+const emit = defineEmits<{
+	(e: 'confirm'): void;
+	(e: 'cancel'): void;
+}>();
 
 const confirm = () => {
 	emit('confirm');

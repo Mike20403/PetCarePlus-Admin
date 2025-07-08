@@ -85,15 +85,15 @@
 									<span v-html="header.formatter(item[header.key], item)"></span>
 								</template>
 								<template v-else-if="header.type === 'status'">
-									<span :class="'status-badge status-badge-' + item[header.key].toLowerCase()">
+									<span :class="'status-badge status-badge-' + (typeof item[header.key] === 'string' ? (item[header.key] as string).toLowerCase() : '')">
 										{{ item[header.key] }}
 									</span>
 								</template>
 								<template v-else-if="header.type === 'date'">
-									{{ formatDate(item[header.key]) }}
+									{{ formatDate(item[header.key] as string | Date) }}
 								</template>
 								<template v-else-if="header.type === 'currency'">
-									{{ formatCurrency(item[header.key]) }}
+									{{ formatCurrency(Number(item[header.key])) }}
 								</template>
 								<template v-else>
 									{{ item[header.key] }}
@@ -150,12 +150,16 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 
+interface TableItem {
+	[key: string]: unknown;
+}
+
 interface DataTableHeader {
 	key: string;
 	title: string;
 	sortable?: boolean;
 	type?: 'text' | 'date' | 'currency' | 'status';
-	formatter?: (value: any, item: any) => string;
+	formatter?: (value: unknown, item: TableItem) => string;
 }
 
 const props = defineProps({
@@ -164,7 +168,7 @@ const props = defineProps({
 		required: true
 	},
 	items: {
-		type: Array as () => Record<string, any>[],
+		type: Array as () => TableItem[],
 		required: true
 	},
 	loading: {
@@ -337,8 +341,12 @@ watch([sortKey, sortDirection], () => {
 			const aValue = a[sortKey.value];
 			const bValue = b[sortKey.value];
 
-			if (aValue < bValue) return sortDirection.value === 'asc' ? -1 : 1;
-			if (aValue > bValue) return sortDirection.value === 'asc' ? 1 : -1;
+			// Convert values to strings for comparison if they're not numbers
+			const aString = typeof aValue === 'number' ? aValue : String(aValue || '');
+			const bString = typeof bValue === 'number' ? bValue : String(bValue || '');
+
+			if (aString < bString) return sortDirection.value === 'asc' ? -1 : 1;
+			if (aString > bString) return sortDirection.value === 'asc' ? 1 : -1;
 			return 0;
 		});
 		// Replace the array contents without changing the reference

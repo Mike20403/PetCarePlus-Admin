@@ -13,8 +13,8 @@ export function useUsers() {
     try {
       const res = await UserService.getUsers(criteria, page, size, sortBy, sort)
       users.value = res.data.items || []
-    } catch (e: any) {
-      error.value = e.message || 'Failed to fetch users'
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Failed to fetch users'
     } finally {
       loading.value = false
     }
