@@ -23,7 +23,7 @@ export class BookingsService {
 		sortBy?: string,
 		sort: 'asc' | 'desc' = 'asc',
 		criteria?: BookingCriteria
-	): Promise<ApiResponse<Booking[]>> {
+	): Promise<Booking[]> {
 		const params = {
 			page,
 			size,
@@ -33,7 +33,7 @@ export class BookingsService {
 		}
 		
 		const response = await api.get(this.BASE_URL, { params })
-		return response.data
+		return response.data as Booking[]
 	}
 
 	/**

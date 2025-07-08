@@ -12,7 +12,7 @@ export function useBookings() {
     error.value = null
     try {
       const res = await BookingsService.getBookings(page, size, sortBy, sort, criteria)
-      bookings.value = res.data || []
+      bookings.value = res || []
     } catch (e) {
       error.value = (e as { message: string}).message || 'Failed to fetch bookings'
     } finally {

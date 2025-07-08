@@ -12,12 +12,12 @@ export class WithdrawalsService {
 		const response = await api.get(this.BASE_URL, {
 			params: { page, size }
 		})
-		return response.data
+		return response.data as Withdrawal[]
 	}
 
 	static async getWithdrawalById(id: string): Promise<Withdrawal> {
 		const response = await api.get(`${this.BASE_URL}/${id}`)
-		return response.data
+		return response.data as Withdrawal
 	}
 
 	/**
@@ -70,11 +70,11 @@ export class WithdrawalsService {
 
 	static async getWithdrawalsByUser(userId: string): Promise<Withdrawal[]> {
 		const response = await api.get(`${this.BASE_URL}/user/${userId}`)
-		return response.data
+		return response.data as Withdrawal[]
 	}
 
 	static async getWithdrawalsByStatus(status: WithdrawalStatus): Promise<Withdrawal[]> {
 		const response = await api.get(`${this.BASE_URL}/status/${status}`)
-		return response.data
+		return response.data as Withdrawal[]
 	}
 }

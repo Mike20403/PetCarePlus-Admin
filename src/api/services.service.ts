@@ -28,7 +28,7 @@ export class ServicesService {
 		}
 		
 		const response = await api.get(this.BASE_URL, { params })
-		return response.data
+		return response.data as Service[]
 	}
 
 	/**
@@ -74,7 +74,7 @@ export class ServicesService {
 	 * Delete a service
 	 */
 	static async deleteService(id: string): Promise<void> {
-		const response = await api.delete(`${this.BASE_URL}/${id}`)
+		const response = await api.delete<ApiResponse<Service>>(`${this.BASE_URL}/${id}`)
 		
 		if (!response.data.success) {
 			throw new Error(response.data.message || 'Failed to delete service')
@@ -100,6 +100,6 @@ export class ServicesService {
 		}
 		
 		const response = await api.get(`${this.BASE_URL}/search/advanced`, { params })
-		return response.data
+		return response.data as Service[]
 	}
 }
