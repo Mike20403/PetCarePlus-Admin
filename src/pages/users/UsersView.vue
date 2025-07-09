@@ -1,14 +1,27 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useUsers } from '@/hooks/useUsers'
 import type { User } from '@/types/user'
+import UserDetailModal from '@/components/UserDetailModal.vue'
 
 const authStore = useAuthStore()
-const { users, fetchUsers } = useUsers()
+const { users, fetchUsers, getUserById, updateUser, changeUserRole, toggleUserBlockStatus } = useUsers()
 const showUserModal = ref(false)
 const currentUser = ref<User | null>(null)
+const showUserDetail = ref(false)
+const detailUser = ref<User | null>(null)
+const detailLoading = ref(false)
+const actionLoading = ref(false)
+
+// Thêm state cho filter/search/pagination
+const searchQuery = ref('')
+const selectedRole = ref('')
+const page = ref(1)
+const size = ref(10)
+const total = ref(0)
+const pages = ref(1)
 
 const openCreateUserModal = () => {
 	currentUser.value = null
@@ -22,13 +35,72 @@ const openEditUserModal = (user: User) => {
 
 const deleteUser = async () => {
 	if (confirm('Are you sure you want to delete this user?')) {
-		await fetchUsers()
+		await fetchAndSetUsers()
+	}
+}
+
+const openUserDetail = async (user: User) => {
+  detailLoading.value = true
+  try {
+    const data = await getUserById(user.id)
+    detailUser.value = data
+    showUserDetail.value = true
+  } finally {
+    detailLoading.value = false
+  }
+}
+
+const handleSave = async (user: User) => {
+  actionLoading.value = true
+  try {
+    await updateUser(user.id, user)
+    await fetchAndSetUsers()
+    showUserDetail.value = false
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const handleBlock = async (user: User) => {
+  actionLoading.value = true
+  try {
+    await toggleUserBlockStatus(user.id, !user.blockedAt)
+    await fetchAndSetUsers()
+    showUserDetail.value = false
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const handleRoleChange = async (user: User) => {
+  actionLoading.value = true
+  try {
+    await changeUserRole(user.id, user.role)
+    await fetchAndSetUsers()
+    showUserDetail.value = false
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+// Hàm fetch users kèm filter/search/pagination
+async function fetchAndSetUsers() {
+	const criteria: any = {}
+	if (searchQuery.value) criteria.query = searchQuery.value
+	if (selectedRole.value) criteria.roles = [selectedRole.value]
+	const res = await fetchUsers(criteria, page.value, size.value, 'createdAt', 'asc')
+	if (res) {
+		total.value = res.total || 0
+		pages.value = res.pages || 1
 	}
 }
 
 onMounted(() => {
-	fetchUsers()
+	fetchAndSetUsers()
 })
+
+// Theo dõi thay đổi filter/search/pagination để fetch lại
+watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 </script>
 
 <template>
@@ -51,8 +123,8 @@ onMounted(() => {
 						<h3 class="card-title">Users Management</h3>
 						<div class="card-actions">
 							<div class="d-flex">
-								<input type="search" class="form-control me-3" placeholder="Search users..." aria-label="Search users">
-								<select class="form-select w-auto">
+								<input type="search" class="form-control me-3" placeholder="Search users..." aria-label="Search users" v-model="searchQuery">
+								<select class="form-select w-auto" v-model="selectedRole">
 									<option value="">All Roles</option>
 									<option value="admin">Admin</option>
 									<option value="manager">Manager</option>
@@ -112,6 +184,13 @@ onMounted(() => {
 									</td>
 									<td>
 										<div class="btn-list flex-nowrap">
+											<button class="btn btn-sm" @click.prevent="openUserDetail(user)" title="View detail">
+												<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+													<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+													<circle cx="12" cy="12" r="2" />
+													<path d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" />
+												</svg>
+											</button>
 											<a href="#" class="btn btn-sm" @click.prevent="openEditUserModal(user)">
 												Edit
 											</a>
@@ -149,10 +228,10 @@ onMounted(() => {
 						</table>
 					</div>
 					<div class="card-footer d-flex align-items-center">
-						<p class="m-0 text-secondary">Showing <span>1</span> to <span>{{ users.length }}</span> of <span>{{ users.length }}</span> entries</p>
+						<p class="m-0 text-secondary">Showing <span>{{ (page-1)*size+1 }}</span> to <span>{{ Math.min(page*size, total) }}</span> of <span>{{ total }}</span> entries</p>
 						<ul class="pagination m-0 ms-auto">
-							<li class="page-item disabled">
-								<a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+							<li class="page-item" :class="{ disabled: page === 1 }">
+								<a class="page-link" href="#" tabindex="-1" aria-disabled="true" @click.prevent="page > 1 && (page = page - 1)">
 									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
 										<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
 										<path d="M15 6l-6 6l6 6" />
@@ -160,9 +239,11 @@ onMounted(() => {
 									prev
 								</a>
 							</li>
-							<li class="page-item active"><a class="page-link" href="#">1</a></li>
-							<li class="page-item disabled">
-								<a class="page-link" href="#">
+							<li v-for="p in pages" :key="p" class="page-item" :class="{ active: page === p }">
+								<a class="page-link" href="#" @click.prevent="page = p">{{ p }}</a>
+							</li>
+							<li class="page-item" :class="{ disabled: page === pages }">
+								<a class="page-link" href="#" @click.prevent="page < pages && (page = page + 1)">
 									next
 									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
 										<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -175,6 +256,15 @@ onMounted(() => {
 				</div>
 			</div>
 		</div>
+		<UserDetailModal
+			:isOpen="showUserDetail"
+			:user="detailUser"
+			:loading="detailLoading || actionLoading"
+			@close="showUserDetail = false"
+			@save="handleSave"
+			@block="handleBlock"
+			@roleChange="handleRoleChange"
+		/>
 	</DashboardLayout>
 </template>
 

@@ -12,12 +12,18 @@ export function useUsers() {
     error.value = null
     try {
       const res = await UserService.getUsers(criteria, page, size, sortBy, sort)
-      users.value = res.data.items || []
+      users.value = res.items || []
+      console.log('users sau khi gán:', users.value) // Log giá trị users sau khi gán
+      return res
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch users'
     } finally {
       loading.value = false
     }
+  }
+
+  async function getUserById(id: string) {
+    return UserService.getUserById(id)
   }
 
   async function updateUser(id: string, data: UpdateUserRequest) {
@@ -37,6 +43,7 @@ export function useUsers() {
     loading,
     error,
     fetchUsers,
+    getUserById,
     updateUser,
     changeUserRole,
     toggleUserBlockStatus

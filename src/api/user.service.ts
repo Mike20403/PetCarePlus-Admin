@@ -33,8 +33,7 @@ export class UserService {
     size: number = 10,
     sortBy: string = 'createdAt',
     sort: 'asc' | 'desc' = 'asc'
-  ): Promise<ApiResponse<ListUserResponse>> {
-
+  ): Promise<any> {
     const params = {
       ...criteria,
       page,
@@ -42,22 +41,20 @@ export class UserService {
       sortBy,
       sort
     }
-
-    const response = await api.get<ApiResponse<ListUserResponse>>(this.BASE_URL, { params })
-    return response.data
+    const response = await api.get(this.BASE_URL, { params })
+    const data: any = response.data
+    // Nếu có items ở ngoài cùng thì trả về luôn, nếu có data.items thì trả về data.data
+    if (data.items) return data
+    if (data.data && data.data.items) return data.data
+    return data
   }
 
   /**
    * Get a user by ID
    */
   static async getUserById(id: string): Promise<User> {
-    const response = await api.get<ApiResponse<User>>(`${this.BASE_URL}/${id}`)
-    
-    if (response.data.success && response.data.data) {
-      return response.data.data
-    }
-    
-    throw new Error(response.data.message || 'Failed to get user')
+    const response = await api.get(`${this.BASE_URL}/${id}`)
+    return response.data as User
   }
 
   /**

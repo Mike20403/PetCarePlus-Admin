@@ -6,6 +6,9 @@ export interface PaginationParams {
 }
 
 export interface PaginationResponse<T> {
-	items: T[]
-	page: number
+  items: T[]
+  page: number
+  pages: number
+  size: number
+  total: number
 }

@@ -6,13 +6,20 @@ export function useServices() {
   const services = ref<Service[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const total = ref(0)
+  const pages = ref(0)
+  const currentPage = ref(1)
 
-  async function fetchServices(page = 1, size = 10, sortBy?: string, sort: 'asc' | 'desc' = 'asc') {
+  async function fetchServices(criteria?: any, page = 1, size = 10, sortBy = 'createdAt', sort: 'asc' | 'desc' = 'asc') {
     loading.value = true
     error.value = null
     try {
-      const res = await ServicesService.getServices(page, size, sortBy, sort)
-      services.value = res || []
+      const res = await ServicesService.getServices(criteria, page, size, sortBy, sort)
+      services.value = res.content || []
+      total.value = res.totalElements || 0
+      pages.value = res.totalPages || 1
+      currentPage.value = (res.number || 0) + 1
+      return res
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch services'
     } finally {
