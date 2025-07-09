@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useUsers } from '@/hooks/useUsers'
 import type { User } from '@/types/user'
 import UserDetailModal from '@/components/UserDetailModal.vue'
+import type { UserCriteria } from '@/api'
 
 const authStore = useAuthStore()
 const { users, fetchUsers, getUserById, updateUser, changeUserRole, toggleUserBlockStatus } = useUsers()
@@ -40,58 +41,58 @@ const deleteUser = async () => {
 }
 
 const openUserDetail = async (user: User) => {
-  detailLoading.value = true
-  try {
-    const data = await getUserById(user.id)
-    detailUser.value = data
-    showUserDetail.value = true
-  } finally {
-    detailLoading.value = false
-  }
+	detailLoading.value = true
+	try {
+		const data = await getUserById(user.id)
+		detailUser.value = data
+		showUserDetail.value = true
+	} finally {
+		detailLoading.value = false
+	}
 }
 
 const handleSave = async (user: User) => {
-  actionLoading.value = true
-  try {
-    await updateUser(user.id, user)
-    await fetchAndSetUsers()
-    showUserDetail.value = false
-  } finally {
-    actionLoading.value = false
-  }
+	actionLoading.value = true
+	try {
+		await updateUser(user.id, user)
+		await fetchAndSetUsers()
+		showUserDetail.value = false
+	} finally {
+		actionLoading.value = false
+	}
 }
 
 const handleBlock = async (user: User) => {
-  actionLoading.value = true
-  try {
-    await toggleUserBlockStatus(user.id, !user.blockedAt)
-    await fetchAndSetUsers()
-    showUserDetail.value = false
-  } finally {
-    actionLoading.value = false
-  }
+	actionLoading.value = true
+	try {
+		await toggleUserBlockStatus(user.id, !user.blockedAt)
+		await fetchAndSetUsers()
+		showUserDetail.value = false
+	} finally {
+		actionLoading.value = false
+	}
 }
 
 const handleRoleChange = async (user: User) => {
-  actionLoading.value = true
-  try {
-    await changeUserRole(user.id, user.role)
-    await fetchAndSetUsers()
-    showUserDetail.value = false
-  } finally {
-    actionLoading.value = false
-  }
+	actionLoading.value = true
+	try {
+		await changeUserRole(user.id, user.role)
+		await fetchAndSetUsers()
+		showUserDetail.value = false
+	} finally {
+		actionLoading.value = false
+	}
 }
 
 // Hàm fetch users kèm filter/search/pagination
 async function fetchAndSetUsers() {
-	const criteria: any = {}
+	const criteria: UserCriteria = {}
 	if (searchQuery.value) criteria.query = searchQuery.value
 	if (selectedRole.value) criteria.roles = [selectedRole.value]
 	const res = await fetchUsers(criteria, page.value, size.value, 'createdAt', 'asc')
 	if (res) {
-		total.value = res.total || 0
-		pages.value = res.pages || 1
+		total.value = res.length || 0
+		pages.value = 1
 	}
 }
 
@@ -107,8 +108,9 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 	<DashboardLayout title="Users" subtitle="Manage system users and their permissions">
 		<template #actions>
 			<button v-if="authStore.hasRole('ADMIN')" @click="openCreateUserModal" class="btn btn-primary">
-				<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-					<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+				<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
+					stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+					<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 					<path d="M12 5l0 14" />
 					<path d="M5 12l14 0" />
 				</svg>
@@ -123,7 +125,8 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 						<h3 class="card-title">Users Management</h3>
 						<div class="card-actions">
 							<div class="d-flex">
-								<input type="search" class="form-control me-3" placeholder="Search users..." aria-label="Search users" v-model="searchQuery">
+								<input type="search" class="form-control me-3" placeholder="Search users..." aria-label="Search users"
+									v-model="searchQuery">
 								<select class="form-select w-auto" v-model="selectedRole">
 									<option value="">All Roles</option>
 									<option value="admin">Admin</option>
@@ -151,7 +154,8 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 								<tr v-for="user in users" :key="user.id">
 									<td data-label="Name">
 										<div class="d-flex py-1 align-items-center">
-											<span class="avatar me-2" :style="`background-image: url(https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)})`"></span>
+											<span class="avatar me-2"
+												:style="`background-image: url(https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)})`"></span>
 											<div class="flex-fill">
 												<div class="font-weight-medium">{{ user.name }} {{ user.lastName }}</div>
 												<div class="text-secondary">ID: {{ user.id }}</div>
@@ -185,8 +189,10 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 									<td>
 										<div class="btn-list flex-nowrap">
 											<button class="btn btn-sm" @click.prevent="openUserDetail(user)" title="View detail">
-												<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-													<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+												<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24"
+													stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+													stroke-linejoin="round">
+													<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 													<circle cx="12" cy="12" r="2" />
 													<path d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" />
 												</svg>
@@ -200,8 +206,10 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 												</button>
 												<div class="dropdown-menu dropdown-menu-end">
 													<a class="dropdown-item" href="#" @click.prevent="openEditUserModal(user)">
-														<svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-															<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+														<svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24"
+															height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+															stroke-linecap="round" stroke-linejoin="round">
+															<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 															<path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
 															<path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
 															<path d="M16 5l3 3" />
@@ -209,8 +217,10 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 														Edit
 													</a>
 													<a class="dropdown-item" href="#" @click.prevent="deleteUser()">
-														<svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-															<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+														<svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24"
+															height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+															stroke-linecap="round" stroke-linejoin="round">
+															<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 															<path d="M4 7l16 0" />
 															<path d="M10 11l0 6" />
 															<path d="M14 11l0 6" />
@@ -228,12 +238,16 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 						</table>
 					</div>
 					<div class="card-footer d-flex align-items-center">
-						<p class="m-0 text-secondary">Showing <span>{{ (page-1)*size+1 }}</span> to <span>{{ Math.min(page*size, total) }}</span> of <span>{{ total }}</span> entries</p>
+						<p class="m-0 text-secondary">Showing <span>{{ (page - 1) * size + 1 }}</span> to <span>{{ Math.min(page * size,
+								total)
+								}}</span> of <span>{{ total }}</span> entries</p>
 						<ul class="pagination m-0 ms-auto">
 							<li class="page-item" :class="{ disabled: page === 1 }">
-								<a class="page-link" href="#" tabindex="-1" aria-disabled="true" @click.prevent="page > 1 && (page = page - 1)">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+								<a class="page-link" href="#" tabindex="-1" aria-disabled="true"
+									@click.prevent="page > 1 && (page = page - 1)">
+									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+										stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+										<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 										<path d="M15 6l-6 6l6 6" />
 									</svg>
 									prev
@@ -245,8 +259,9 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 							<li class="page-item" :class="{ disabled: page === pages }">
 								<a class="page-link" href="#" @click.prevent="page < pages && (page = page + 1)">
 									next
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+										stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+										<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 										<path d="M9 6l6 6l-6 6" />
 									</svg>
 								</a>
@@ -256,15 +271,8 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 				</div>
 			</div>
 		</div>
-		<UserDetailModal
-			:isOpen="showUserDetail"
-			:user="detailUser"
-			:loading="detailLoading || actionLoading"
-			@close="showUserDetail = false"
-			@save="handleSave"
-			@block="handleBlock"
-			@roleChange="handleRoleChange"
-		/>
+		<UserDetailModal :isOpen="showUserDetail" :user="detailUser" :loading="detailLoading || actionLoading"
+			@close="showUserDetail = false" @save="handleSave" @block="handleBlock" @roleChange="handleRoleChange" />
 	</DashboardLayout>
 </template>
 
@@ -295,11 +303,11 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 	.table-mobile-md {
 		display: block;
 	}
-	
+
 	.table-mobile-md thead {
 		display: none;
 	}
-	
+
 	.table-mobile-md tr {
 		display: block;
 		border: 1px solid var(--tblr-border-color);
@@ -307,7 +315,7 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 		margin-bottom: 1rem;
 		padding: 1rem;
 	}
-	
+
 	.table-mobile-md td {
 		display: block;
 		text-align: right;
@@ -315,11 +323,11 @@ watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
 		border: none;
 		border-bottom: 1px solid var(--tblr-border-color-light);
 	}
-	
+
 	.table-mobile-md td:last-child {
 		border-bottom: none;
 	}
-	
+
 	.table-mobile-md td[data-label]:before {
 		content: attr(data-label);
 		float: left;

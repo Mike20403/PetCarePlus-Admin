@@ -15,12 +15,12 @@ export class ServicesService {
 	 * Get all services with pagination
 	 */
 	static async getServices(
-		criteria?: any,
+		criteria?: ServiceCriteria,
 		page: number = 1,
 		size: number = 10,
 		sortBy: string = 'createdAt',
 		sort: 'asc' | 'desc' = 'asc'
-	): Promise<any> {
+	): Promise<Service[]> {
 		const params = {
 			...criteria,
 			page,
@@ -29,7 +29,7 @@ export class ServicesService {
 			sort
 		}
 		
-		const response = await api.get(this.BASE_URL, { params })
+		const response = await api.get<Service[]>(this.BASE_URL, { params })
 		return response.data
 	}
 

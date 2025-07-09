@@ -1,6 +1,6 @@
 import { api } from './axios'
 import type { ApiResponse } from '@/types/common'
-import type { ListUserResponse, User } from '@/types/user'
+import type { User } from '@/types/user'
 
 export interface UserCriteria {
   roles?: string[];
@@ -33,7 +33,7 @@ export class UserService {
     size: number = 10,
     sortBy: string = 'createdAt',
     sort: 'asc' | 'desc' = 'asc'
-  ): Promise<any> {
+  ): Promise<User[]> {
     const params = {
       ...criteria,
       page,
@@ -41,20 +41,16 @@ export class UserService {
       sortBy,
       sort
     }
-    const response = await api.get(this.BASE_URL, { params })
-    const data: any = response.data
-    // Nếu có items ở ngoài cùng thì trả về luôn, nếu có data.items thì trả về data.data
-    if (data.items) return data
-    if (data.data && data.data.items) return data.data
-    return data
+    const response = await api.get<User[]>(this.BASE_URL, { params })
+    return response.data
   }
 
   /**
    * Get a user by ID
    */
   static async getUserById(id: string): Promise<User> {
-    const response = await api.get(`${this.BASE_URL}/${id}`)
-    return response.data as User
+    const response = await api.get<User>(`${this.BASE_URL}/${id}`)
+    return response.data
   }
 
   /**
