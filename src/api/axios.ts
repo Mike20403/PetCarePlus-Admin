@@ -6,7 +6,7 @@ import { logger } from '@/utils/logger'
 import type { RefreshQueueItem } from '@/types/jwt'
 
 const axiosInstance = axios.create({
-	baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+	baseURL: import.meta.env.VITE_API_BASE_URL,
 	timeout: parseInt(import.meta.env.VITE_API_TIMEOUT as string) || 10000,
 	headers: {
 		'Content-Type': 'application/json',
