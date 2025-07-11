@@ -1,11 +1,11 @@
 <template>
   <RouterView />
-  <Toast />
+  <ToastMessage />
 </template>
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import Toast from '@/components/ui/Toast.vue'
+import ToastMessage from './components/ui/ToastMessage.vue'
 </script>
 
 <style>
