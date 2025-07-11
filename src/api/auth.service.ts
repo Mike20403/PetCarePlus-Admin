@@ -1,7 +1,7 @@
 import type { LoginRequest, LoginResponse, RefreshTokenResponse } from '@/types/auth'
 import { TokenManager } from '@/utils/auth'
 import { api } from './axios'
-import type { UserInfo } from '@/types'
+import type { User, UserInfo } from '@/types'
 import type { ProfileUpdateRequest, JwtPayload } from '@/types/jwt'
 
 export class AuthService {
@@ -27,7 +27,7 @@ export class AuthService {
 			if (!token) {
 				throw new Error('No access token available');
 			}
-			
+
 			// Backend expects a GET request with Authorization header
 			await api.get(`${this.BASE_URL}/logout`, {
 				headers: {
@@ -102,10 +102,10 @@ export class AuthService {
 	}
 
 	// Get stored user data
-	static getCurrentUserData(): UserInfo | null {
+	static getCurrentUserData(): User | null {
 		return TokenManager.getUser()
 	}
-	
+
 	// Parse JWT token to get expiration time
 	static parseJwt(token: string): JwtPayload | null {
 		try {
@@ -114,7 +114,7 @@ export class AuthService {
 			const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
 				return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
 			}).join(''));
-			
+
 			return JSON.parse(jsonPayload);
 		} catch {
 			return null;

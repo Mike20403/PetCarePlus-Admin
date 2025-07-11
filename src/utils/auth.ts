@@ -1,14 +1,12 @@
 import type { LoginResponse, RefreshTokenResponse } from "@/api"
-import type { UserInfo } from "@/types"
+import type { User } from "@/types"
 
-// Token storage keys
 const TOKEN_KEY = 'auth_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
 const USER_KEY = 'user_data'
 const TOKEN_EXPIRY_KEY = 'token_expiry'
 const REFRESH_TOKEN_EXPIRY_KEY = 'refresh_token_expiry'
 
-// Token management utilities
 export class TokenManager {
 	// Get access token
 	static getAccessToken(): string | null {
@@ -18,7 +16,7 @@ export class TokenManager {
 	// Set access token
 	static setToken(token: string, expiresIn?: number): void {
 		localStorage.setItem(TOKEN_KEY, token)
-		
+
 		// If expiration time is provided, store it
 		if (expiresIn) {
 			const expiryTime = Date.now() + expiresIn
@@ -40,7 +38,7 @@ export class TokenManager {
 	// Set refresh token
 	static setRefreshToken(refreshToken: string, expiresIn?: number): void {
 		localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
-		
+
 		// If expiration time is provided, store it
 		if (expiresIn) {
 			const expiryTime = Date.now() + expiresIn
@@ -67,7 +65,7 @@ export class TokenManager {
 	}
 
 	// Get user data
-	static getUser(): UserInfo | null {
+	static getUser(): User | null {
 		const userData = localStorage.getItem(USER_KEY);
 
 		if (!userData || userData === 'null' || userData === 'undefined') {
@@ -78,12 +76,12 @@ export class TokenManager {
 		if (!user) {
 			return null;
 		}
-		
+
 		return user;
 	}
 
 	// Set user data
-	static setUser(user: UserInfo): void {
+	static setUser(user: User): void {
 		localStorage.setItem(USER_KEY, JSON.stringify(user))
 	}
 
@@ -127,7 +125,7 @@ export class TokenManager {
 		if (expiryTime && Date.now() >= expiryTime) {
 			return true
 		}
-		
+
 		// Fallback to JWT payload check
 		const token = this.getAccessToken()
 		if (!token) return true
@@ -141,7 +139,7 @@ export class TokenManager {
 			return true
 		}
 	}
-	
+
 	// Check if refresh token is expired
 	static isRefreshTokenExpired(): boolean {
 		// First check stored expiry time
@@ -149,7 +147,7 @@ export class TokenManager {
 		if (expiryTime && Date.now() >= expiryTime) {
 			return true
 		}
-		
+
 		// Fallback to JWT payload check
 		const token = this.getRefreshToken()
 		if (!token) return true

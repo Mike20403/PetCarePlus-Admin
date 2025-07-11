@@ -1,6 +1,13 @@
 <template>
-  <AppModal :isOpen="isOpen" title="User Detail" @close="onClose">
-    <div>
+  <AppModal :isOpen="isOpen" title="User Detail" @close="close">
+    <div v-if="isLoading">
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+    <div v-else>
       <FormInput disabled label="Name" name="name" :modelValue="user?.name" readonly />
       <FormInput disabled label="Last Name" name="lastName" :modelValue="user?.lastName" readonly />
       <FormInput disabled label="Email" name="email" :modelValue="user?.email" readonly type="email" />
@@ -13,20 +20,41 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { FormInput } from '../forms'
-import type { User } from '@/types/user'
 import AppModal from '@/components/AppModal.vue'
+import type { User } from '@/types/user'
+import { useUsers } from '@/hooks/useUsers'
 
-const props = defineProps<{
-  isOpen: boolean
-  user: User | null
-  loading?: boolean
-}>()
-const emit = defineEmits(['close'])
+const { getUserById } = useUsers()
 
-function onClose() {
-  emit('close')
+const isOpen = ref(false)
+const isLoading = ref(false)
+const user = ref<User | null>(null)
+
+async function loadUser(id: string) {
+  isLoading.value = true
+  const u = await getUserById(id)
+
+  if (u) {
+    user.value = { ...u, phoneNumber: u.phoneNumber || '' }
+  }
+  isLoading.value = false
 }
+
+function open(id: string) {
+  isOpen.value = true
+  loadUser(id)
+}
+
+function close() {
+  isOpen.value = false
+}
+
+defineExpose({
+  open,
+  close
+})
 </script>
 
 <style scoped>

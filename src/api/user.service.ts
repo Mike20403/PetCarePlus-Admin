@@ -99,6 +99,19 @@ export class UserService {
 
     throw new Error(response.data.message || 'Failed to toggle user block status')
   }
+
+  /**
+   * Delete a user
+   */
+  static async blockUnblockUser(id: string, blocked: boolean): Promise<User> {
+    const response = await api.put<User>(`${this.BASE_URL}/${id}/block`, null, { params: { blocked } })
+
+    if (response.status === 200 && response.data) {
+      return response.data
+    }
+
+    throw new Error(response.statusText || 'Failed to block/unblock user')
+  }
 }
 
 // For backward compatibility

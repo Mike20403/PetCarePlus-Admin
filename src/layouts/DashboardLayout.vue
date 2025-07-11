@@ -18,7 +18,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="page-content mt-3">
             <slot></slot>
           </div>
@@ -62,7 +62,8 @@ onMounted(() => {
 .page-wrapper {
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
-  padding-top: 60px; /* Space for header */
+  padding-top: 60px;
+  /* Space for header */
 }
 
 .page-header {
@@ -88,17 +89,17 @@ onMounted(() => {
     margin-left: 0 !important;
     padding-top: 60px;
   }
-  
+
   .container-xl {
     padding-left: 1rem;
     padding-right: 1rem;
   }
-  
+
   .page-header .row {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .col-auto {
     align-self: stretch;
   }
@@ -109,7 +110,7 @@ onMounted(() => {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
-  
+
   .page-title {
     font-size: 1.25rem;
   }

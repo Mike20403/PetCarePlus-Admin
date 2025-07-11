@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
 import { useUsers } from '@/hooks/useUsers'
 import type { User } from '@/types/user'
 import type { UserCriteria } from '@/api'
@@ -8,19 +8,23 @@ import type { UserCriteria } from '@/api'
 import UserDetailModal from '@/components/user/UserDetailModal.vue'
 import UserEditModal from '@/components/user/UserEditModal.vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
+import { useToast } from '@/hooks/useToast'
 
+const { users, fetchUsers, updateUser, blockUnblockUser } = useUsers()
 
-const authStore = useAuthStore()
-const { users, fetchUsers, getUserById, updateUser, changeUserRole, toggleUserBlockStatus } = useUsers()
-const currentUser = ref<User | null>(null)
+defineProps({
+  isOpen: {
+    type: Boolean,
+    required: true
+  }
+})
 
-const openDetail = ref(false)
-const openEdit = ref(false)
-const detailUser = ref<User | null>(null)
-const editUser = ref<User | null>(null)
-const detailLoading = ref(false)
-const actionLoading = ref(false)
+const detailUserModal = ref<InstanceType<typeof UserDetailModal> | null>(null)
+const editUserModal = ref<InstanceType<typeof UserEditModal> | null>(null)
+const { toast } = useToast()
+const fetchLoading = ref(false)
+const confirmationDialog = ref<InstanceType<typeof ConfirmationDialog> | null>(null)
 
 const searchQuery = ref<string>('')
 const selectedRole = ref<string>('')
@@ -29,79 +33,74 @@ const size = ref<number>(10)
 const total = ref<number>(0)
 const pages = ref<number>(1)
 
-const openCreateUserModal = () => {
-  currentUser.value = null
-  open.value = true
-}
-
 const openEditUserModal = (user: User) => {
-  editUser.value = user
-  openEdit.value = true
+  editUserModal.value?.open(user.id)
 }
 
-const deleteUser = async (user: User) => {
-  if (confirm('Are you sure you want to delete this user?')) {
-    await fetchAndSetUsers()
-  }
+const handleBlock = (id: string) => {
+  const item = users.value.find(user => user.id === id)
+  if (!item) return
+
+  confirmationDialog.value?.open(
+    `Are you sure you want to ${item.blockedAt ? 'unblock' : 'block'} this user?`,
+    `${item.blockedAt ? 'Unblock' : 'Block'} User`,
+    async () => {
+      await blockUnblockUser(id, !item.blockedAt)
+      await fetchAndSetUsers()
+    }
+  )
 }
 
 const openUserDetail = async (user: User) => {
-  detailLoading.value = true
-  try {
-    const data = await getUserById(user.id)
-    detailUser.value = data
-    openDetail.value = true
-  } finally {
-    detailLoading.value = false
-  }
+  detailUserModal.value?.open(user.id)
 }
 
 const handleEditSave = async (user: User) => {
-  actionLoading.value = true
+  fetchLoading.value = true
   try {
     await updateUser(user.id, user)
-    await fetchAndSetUsers()
-    openEdit.value = false
+    toast({
+      type: 'success',
+      message: 'User updated successfully'
+    })
+  } catch (error) {
+    console.error('Failed to update user:', error)
+    toast({
+      type: 'error',
+      message: (error as Error).message || 'Failed to update user'
+    })
   } finally {
-    actionLoading.value = false
-  }
-}
-
-const handleBlock = async (user: User) => {
-  actionLoading.value = true
-  try {
-    await toggleUserBlockStatus(user.id, !user.blockedAt)
-    await fetchAndSetUsers()
-    open.value = false
-  } finally {
-    actionLoading.value = false
-  }
-}
-
-const handleRoleChange = async (user: User) => {
-  actionLoading.value = true
-  try {
-    await changeUserRole(user.id, user.role)
-    await fetchAndSetUsers()
-    open.value = false
-  } finally {
-    actionLoading.value = false
+    fetchLoading.value = false
   }
 }
 
 async function fetchAndSetUsers() {
+  fetchLoading.value = true
+
   const criteria: UserCriteria = {}
   if (searchQuery.value) criteria.query = searchQuery.value
   if (selectedRole.value) criteria.roles = [selectedRole.value]
+
   const res = await fetchUsers(criteria, page.value, size.value, 'createdAt', 'asc')
+
   if (res) {
     total.value = res.total || 0
     pages.value = res.pages || 1
+    page.value = res.page || 1
+    users.value = res.items || []
   }
+
+  fetchLoading.value = false
 }
 
-onMounted(() => {
+const handlePagination = (p: number, s: number) => {
+  page.value = p
+  size.value = s
   fetchAndSetUsers()
+}
+
+onMounted(async () => {
+  await fetchAndSetUsers()
 })
 
 watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
@@ -119,29 +118,16 @@ const userTableHeaders: DataTableHeader[] = [
 const mappedUsers = computed(() => users.value.map(user => ({
   ...user,
   name: `${user.name} ${user.lastName}`,
-  status: user.blockedAt ? 'Inactive' : 'Active',
+  status: user.blockedAt ? 'Blocked' : 'Active',
   emailVerifiedAt: user.emailVerifiedAt ? 'Yes' : 'No',
 })))
 </script>
 
 <template>
   <DashboardLayout title="Users" subtitle="Manage system users and their permissions">
-    <template #actions>
-      <button v-if="authStore.hasRole('ADMIN')" @click="openCreateUserModal" class="btn btn-primary">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
-          stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M12 5l0 14" />
-          <path d="M5 12l14 0" />
-        </svg>
-        Add User
-      </button>
-    </template>
-
-    <DataTable :headers="userTableHeaders" :items="mappedUsers" :loading="actionLoading || detailLoading"
-      :totalItems="total" :title="'Users Management'" :hasActions="true" :itemsPerPageOptions="[10, 25, 50]"
-      @update:search="(val: string) => searchQuery = val"
-      @update:pagination="(p: number, s: number) => { page = p; size = s }" @update:sort="">
+    <DataTable :page="page" :headers="userTableHeaders" :items="mappedUsers" :loading="fetchLoading" :totalItems="total"
+      :title="'Users Management'" :hasActions="true" :itemsPerPageOptions="[10, 25, 50]"
+      @update:search="(val: string) => searchQuery = val" @update:pagination="handlePagination" @update:sort="() => { }">
       <template #rowActions="{ item }">
         <div class="d-flex gap-2">
           <button class="btn btn-sm" @click.prevent="openUserDetail(item as unknown as User)" title="View detail">
@@ -150,16 +136,17 @@ const mappedUsers = computed(() => users.value.map(user => ({
           <button class="btn btn-sm" @click.prevent="openEditUserModal(item as unknown as User)">
             Edit
           </button>
-          <button class="btn btn-sm btn-danger" @click.prevent="deleteUser(item as unknown as User)">
-            Delete
+          <button class="btn btn-sm" :class="{ 'btn-danger': !item.blockedAt, 'btn-success': item.blockedAt }"
+            @click.prevent="handleBlock(item.id as string)">
+            {{ item.blockedAt ? 'Unblock' : 'Block' }}
           </button>
         </div>
       </template>
     </DataTable>
 
-    <UserDetailModal :isOpen="openDetail" :user="detailUser" :loading="detailLoading" @close="openDetail = false" />
-    <UserEditModal :isOpen="openEdit" :user="editUser" :loading="actionLoading" @close="openEdit = false"
-      @save="handleEditSave" />
+    <UserDetailModal ref="detailUserModal" />
+    <UserEditModal ref="editUserModal" @save="handleEditSave" />
+    <ConfirmationDialog ref="confirmationDialog" />
   </DashboardLayout>
 </template>
 

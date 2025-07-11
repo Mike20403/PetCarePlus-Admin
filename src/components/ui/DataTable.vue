@@ -11,13 +11,7 @@
         <div class="input-icon">
           <input type="text" class="form-control" placeholder="Search..." v-model="searchQuery" @input="onSearch" />
           <span class="input-icon-addon">
-            <!-- Download SVG icon from http://tabler-icons.io/i/search -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-              stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-              <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
-              <path d="M21 21l-6 -6"></path>
-            </svg>
+            <IconSearch />
           </span>
         </div>
         <div class="ms-auto d-flex">
@@ -58,21 +52,11 @@
                 <span class="ms-2">Loading...</span>
               </td>
             </tr>
-            <tr v-else-if="paginatedItems.length === 0">
+            <tr v-else-if="items.length === 0">
               <td :colspan="hasActions ? headers.length + 1 : headers.length" class="text-center">
                 <div class="empty">
                   <div class="empty-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-database-off" width="24"
-                      height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                      stroke-linecap="round" stroke-linejoin="round">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                      <path
-                        d="M12.983 8.978c3.955 -.182 7.017 -1.446 7.017 -2.978c0 -1.657 -3.582 -3 -8 -3c-1.661 0 -3.204 .19 -4.483 .515m-3.01 1.265c-.309 .323 -.507 .676 -.507 1.05c0 1.657 3.582 3 8 3c.986 0 1.93 -.067 2.802 -.19">
-                      </path>
-                      <path d="M4 6v6c0 1.657 3.582 3 8 3c3.217 0 5.991 -.712 7.261 -1.74m.739 -3.26v-4"></path>
-                      <path d="M4 12v6c0 1.657 3.582 3 8 3c3.217 0 5.991 -.712 7.261 -1.74m.739 -3.26v-4"></path>
-                      <path d="M3 3l18 18"></path>
-                    </svg>
+                    <IconDatabaseOff />
                   </div>
                   <p class="empty-title">No data available</p>
                   <p class="empty-subtitle text-muted">
@@ -81,7 +65,7 @@
                 </div>
               </td>
             </tr>
-            <tr v-else v-for="(item, index) in paginatedItems" :key="index">
+            <tr v-else v-for="(item, index) in items" :key="index">
               <td v-for="header in headers" :key="header.key">
                 <template v-if="header.formatter">
                   <span v-html="header.formatter(item[header.key], item)"></span>
@@ -111,19 +95,20 @@
       </div>
 
       <div class="card-footer d-flex align-items-center">
+        <div class="me-3">
+          <select class="form-select form-select-sm w-auto" :value="itemsPerPage" @change="onItemsPerPageChange">
+            <option v-for="option in itemsPerPageOptions" :key="option" :value="option">{{ option }}</option>
+          </select>
+        </div>
         <p class="m-0 text-muted">
-          Showing <span>{{ startIndex + 1 }}</span> to <span>{{ endIndex }}</span> of
-          <span>{{ filteredItems.length }}</span> entries
+          Showing <span>{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to
+          <span>{{ Math.min(currentPage * itemsPerPage, totalItems) }}</span> of
+          <span>{{ totalItems }}</span> entries
         </p>
         <ul class="pagination m-0 ms-auto">
           <li class="page-item" :class="{ disabled: currentPage === 1 }">
-            <a class="page-link" href="#" @click.prevent="prevPage">
-              <!-- Download SVG icon from http://tabler-icons.io/i/chevron-left -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M15 6l-6 6l6 6"></path>
-              </svg>
+            <a class="page-link" @click.prevent="prevPage">
+              <IconChevronLeft class="icon" />
               prev
             </a>
           </li>
@@ -131,14 +116,9 @@
             <a class="page-link" href="#" @click.prevent="goToPage(page)">{{ page }}</a>
           </li>
           <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-            <a class="page-link" href="#" @click.prevent="nextPage">
+            <a class="page-link" @click.prevent="nextPage">
               next
-              <!-- Download SVG icon from http://tabler-icons.io/i/chevron-right -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M9 6l6 6l-6 6"></path>
-              </svg>
+              <IconChevronRight class="icon" />
             </a>
           </li>
         </ul>
@@ -148,6 +128,7 @@
 </template>
 
 <script setup lang="ts">
+import { IconChevronLeft, IconChevronRight, IconDatabaseOff, IconSearch } from '@tabler/icons-vue';
 import { ref, computed, watch } from 'vue';
 
 
@@ -174,7 +155,7 @@ const props = defineProps({
   },
   totalItems: {
     type: Number,
-    default: undefined
+    default: 0
   },
   title: {
     type: String,
@@ -187,6 +168,10 @@ const props = defineProps({
   itemsPerPageOptions: {
     type: Array as () => number[],
     default: () => [10, 25, 50, 100]
+  },
+  page: {
+    type: Number,
+    default: 1
   }
 });
 
@@ -199,27 +184,21 @@ interface DataTableEmits {
 
 const emit = defineEmits<DataTableEmits>();
 
-// Pagination
-const currentPage = ref(1);
+// Pagination (controlled)
+const currentPage = ref(props.page);
 const itemsPerPage = ref(props.itemsPerPageOptions[0]);
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredItems.value.length / itemsPerPage.value);
+watch(() => props.page, (val) => {
+  currentPage.value = val;
 });
 
-const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage.value);
-const endIndex = computed(() =>
-  Math.min(startIndex.value + itemsPerPage.value, filteredItems.value.length)
-);
-
-const paginatedItems = computed(() => {
-  return filteredItems.value.slice(startIndex.value, endIndex.value);
+const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(props.totalItems / itemsPerPage.value));
 });
 
 function goToPage(page: number) {
   if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    emit('update:pagination', currentPage.value, itemsPerPage.value);
+    emit('update:pagination', page, itemsPerPage.value);
   }
 }
 
@@ -231,6 +210,11 @@ function nextPage() {
   goToPage(currentPage.value + 1);
 }
 
+function onItemsPerPageChange(e: Event) {
+  const value = Number((e.target as HTMLSelectElement).value);
+  emit('update:pagination', 1, value); // Reset to page 1 on size change
+}
+
 // Search
 const searchQuery = ref('');
 const debouncedSearch = ref();
@@ -239,7 +223,6 @@ function onSearch() {
   clearTimeout(debouncedSearch.value);
   debouncedSearch.value = setTimeout(() => {
     emit('update:search', searchQuery.value);
-    currentPage.value = 1;
   }, 300);
 }
 
@@ -252,33 +235,8 @@ function onFilter() {
   clearTimeout(debouncedFilter.value);
   debouncedFilter.value = setTimeout(() => {
     emit('update:filter', filterColumn.value, filterValue.value);
-    currentPage.value = 1;
   }, 300);
 }
-
-// Combined Search and Filter Logic
-const filteredItems = computed(() => {
-  let currentItems = [...props.items];
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    currentItems = currentItems.filter((item) =>
-      Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(query)
-      )
-    );
-  }
-
-  if (filterColumn.value && filterValue.value) {
-    const column = filterColumn.value;
-    const value = filterValue.value.toLowerCase();
-    currentItems = currentItems.filter((item) =>
-      String(item[column]).toLowerCase().includes(value)
-    );
-  }
-
-  return currentItems;
-});
 
 // Sorting
 const sortKey = ref('');
@@ -297,7 +255,6 @@ function sortBy(key: string) {
   emit('update:sort', sortKey.value, sortDirection.value);
 }
 
-// Formatters
 function formatDate(date: string | Date): string {
   if (!date) return '';
   const dateObj = date instanceof Date ? date : new Date(date);
@@ -317,35 +274,6 @@ function formatCurrency(value: number): string {
     currency: 'USD'
   }).format(value);
 }
-
-watch(
-  () => props.items,
-  () => {
-    currentPage.value = 1;
-  },
-  { deep: true }
-);
-
-// Apply sorting to filtered items
-watch([sortKey, sortDirection], () => {
-  if (sortKey.value) {
-    const itemsToSort = [...filteredItems.value];
-    itemsToSort.sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
-      const aValue = a[sortKey.value];
-      const bValue = b[sortKey.value];
-
-      // Convert values to strings for comparison if they're not numbers
-      const aString = typeof aValue === 'number' ? aValue : String(aValue || '');
-      const bString = typeof bValue === 'number' ? bValue : String(bValue || '');
-
-      if (aString < bString) return sortDirection.value === 'asc' ? -1 : 1;
-      if (aString > bString) return sortDirection.value === 'asc' ? 1 : -1;
-      return 0;
-    });
-    // Replace the array contents without changing the reference
-    filteredItems.value.splice(0, filteredItems.value.length, ...itemsToSort);
-  }
-});
 </script>
 
 <style scoped>

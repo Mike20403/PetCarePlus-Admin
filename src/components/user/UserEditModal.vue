@@ -1,6 +1,13 @@
 <template>
-  <AppModal :isOpen="isOpen" title="Edit User" @close="onClose">
-    <form @submit.prevent="onSave">
+  <AppModal :isOpen="isOpen" title="Edit User" @close="close">
+    <div v-if="loading">
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+    <form v-else @submit.prevent="onSave">
       <FormInput label="Name" name="name" v-model="form.name" />
       <FormInput label="Last Name" name="lastName" v-model="form.lastName" />
       <FormInput label="Email" name="email" :modelValue="form.email" readonly type="email" />
@@ -10,24 +17,25 @@
       <FormInput label="Updated At" name="updatedAt" :modelValue="form.updatedAt" readonly />
       <div class="d-flex gap-2 mt-3">
         <button type="submit" class="btn btn-success">Save</button>
-        <button type="button" class="btn btn-secondary" @click="onClose">Cancel</button>
+        <button type="button" class="btn btn-secondary" @click="close">Cancel</button>
       </div>
     </form>
   </AppModal>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { FormInput, FormSelect } from '../forms'
 import type { User } from '@/types/user'
+import { useUsers } from '@/hooks/useUsers'
+
 import AppModal from '@/components/AppModal.vue'
 
-const props = defineProps<{
-  isOpen: boolean
-  user: User | null
-  loading?: boolean
-}>()
-const emit = defineEmits(['close', 'save'])
+const emit = defineEmits(['save'])
+const { getUserById } = useUsers()
+
+const loading = ref(false)
+const isOpen = ref(false)
 
 const form = ref<User>({
   id: '',
@@ -49,15 +57,47 @@ const roleOptions = computed(() => [
   { value: 'USER', text: 'User' }
 ])
 
-watch(() => props.user, (val) => {
-  if (val) form.value = { ...val, phoneNumber: val.phoneNumber || '' }
-})
+function open(id: string) {
+  isOpen.value = true
+  form.value = {
+    id: '',
+    email: '',
+    name: '',
+    lastName: '',
+    phoneNumber: '',
+    role: '',
+    emailVerifiedAt: null,
+    blockedAt: null,
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null
+  }
 
-function onClose() {
-  emit('close')
+  if (id) {
+    loadUser(id)
+  }
+}
+
+async function loadUser(id: string) {
+  loading.value = true
+  const user = await getUserById(id)
+  if (user) {
+    form.value = { ...user, phoneNumber: user.phoneNumber || '' }
+  }
+  loading.value = false
+}
+
+function close() {
+  isOpen.value = false
 }
 
 function onSave() {
   emit('save', { ...form.value, phoneNumber: form.value.phoneNumber || '' })
+  close()
 }
+
+defineExpose({
+  open,
+  close,
+})
 </script>

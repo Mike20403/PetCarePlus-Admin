@@ -1,48 +1,51 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { WithdrawalsService, type Withdrawal } from '@/api'
-import { useToast } from '@/composables/useToast'
 import { WithdrawalStatus } from '@/types'
+import { useToast } from '@/hooks/useToast'
 
 export const useWithdrawalsStore = defineStore('withdrawals', () => {
   const withdrawals = ref<Withdrawal[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const selectedWithdrawal = ref<Withdrawal | null>(null)
-  const { showToast } = useToast()
+  const { toast } = useToast()
 
   const totalWithdrawals = computed(() => withdrawals.value.length)
-  
-  const pendingWithdrawals = computed(() => 
+
+  const pendingWithdrawals = computed(() =>
     withdrawals.value.filter(withdrawal => withdrawal.status === WithdrawalStatus.PENDING)
   )
-  
-  const approvedWithdrawals = computed(() => 
+
+  const approvedWithdrawals = computed(() =>
     withdrawals.value.filter(withdrawal => withdrawal.status === WithdrawalStatus.APPROVED)
   )
-  
-  const rejectedWithdrawals = computed(() => 
+
+  const rejectedWithdrawals = computed(() =>
     withdrawals.value.filter(withdrawal => withdrawal.status === WithdrawalStatus.REJECTED)
   )
-  
-  const totalPendingAmount = computed(() => 
+
+  const totalPendingAmount = computed(() =>
     pendingWithdrawals.value.reduce((sum, withdrawal) => sum + withdrawal.amount, 0)
   )
-  
-  const totalApprovedAmount = computed(() => 
+
+  const totalApprovedAmount = computed(() =>
     approvedWithdrawals.value.reduce((sum, withdrawal) => sum + withdrawal.amount, 0)
   )
 
   async function fetchWithdrawals() {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await WithdrawalsService.getWithdrawals()
       withdrawals.value = response
     } catch (err) {
       error.value = 'Failed to fetch withdrawals'
-      showToast('Failed to fetch withdrawals', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to fetch withdrawals'
+      })
       console.error(err)
     } finally {
       isLoading.value = false
@@ -52,14 +55,17 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
   async function fetchWithdrawalById(id: string) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await WithdrawalsService.getWithdrawalById(id)
       selectedWithdrawal.value = response
       return response
     } catch (err) {
       error.value = 'Failed to fetch withdrawal details'
-      showToast('Failed to fetch withdrawal details', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to fetch withdrawal details'
+      })
       console.error(err)
       return null
     } finally {
@@ -70,24 +76,30 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
   async function approveWithdrawal(id: string, notes?: string) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await WithdrawalsService.approveWithdrawal(
         id,
         notes
       )
-      
+
       // Update the withdrawal in the local state
       const index = withdrawals.value.findIndex(withdrawal => withdrawal.id === id)
       if (index !== -1) {
         withdrawals.value[index] = response
       }
-      
-      showToast('Withdrawal approved successfully', 'success')
+
+      toast({
+        type: 'success',
+        message: 'Withdrawal approved successfully'
+      })
       return response
     } catch (err) {
       error.value = 'Failed to approve withdrawal'
-      showToast('Failed to approve withdrawal', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to approve withdrawal'
+      })
       console.error(err)
       return null
     } finally {
@@ -98,24 +110,30 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
   async function rejectWithdrawal(id: string, notes?: string) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await WithdrawalsService.rejectWithdrawal(
         id,
         notes || 'Rejected by admin'
       )
-      
+
       // Update the withdrawal in the local state
       const index = withdrawals.value.findIndex(withdrawal => withdrawal.id === id)
       if (index !== -1) {
         withdrawals.value[index] = response
       }
-      
-      showToast('Withdrawal rejected successfully', 'success')
+
+      toast({
+        type: 'success',
+        message: 'Withdrawal rejected successfully'
+      })
       return response
     } catch (err) {
       error.value = 'Failed to reject withdrawal'
-      showToast('Failed to reject withdrawal', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to reject withdrawal'
+      })
       console.error(err)
       return null
     } finally {
@@ -126,13 +144,16 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
   async function fetchWithdrawalsByUser(userId: string) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await WithdrawalsService.getWithdrawalsByUser(userId)
       return response
     } catch (err) {
       error.value = 'Failed to fetch user withdrawals'
-      showToast('Failed to fetch user withdrawals', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to fetch user withdrawals'
+      })
       console.error(err)
       return []
     } finally {
@@ -143,13 +164,16 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
   async function fetchWithdrawalsByStatus(status: Withdrawal['status']) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await WithdrawalsService.getWithdrawalsByStatus(status)
       return response
     } catch (err) {
       error.value = `Failed to fetch ${status} withdrawals`
-      showToast(`Failed to fetch ${status} withdrawals`, 'error')
+      toast({
+        type: 'error',
+        message: `Failed to fetch ${status} withdrawals`
+      })
       console.error(err)
       return []
     } finally {
