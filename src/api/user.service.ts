@@ -1,6 +1,7 @@
 import { api } from './axios'
 import type { ApiResponse } from '@/types/common'
 import type { User } from '@/types/user'
+import type { ListUserResponse } from '@/types/user'
 
 export interface UserCriteria {
   roles?: string[];
@@ -33,7 +34,7 @@ export class UserService {
     size: number = 10,
     sortBy: string = 'createdAt',
     sort: 'asc' | 'desc' = 'asc'
-  ): Promise<User[]> {
+  ): Promise<ListUserResponse> {
     const params = {
       ...criteria,
       page,
@@ -41,7 +42,7 @@ export class UserService {
       sortBy,
       sort
     }
-    const response = await api.get<User[]>(this.BASE_URL, { params })
+    const response = await api.get<ListUserResponse>(this.BASE_URL, { params })
     return response.data
   }
 
@@ -58,11 +59,11 @@ export class UserService {
    */
   static async updateUser(id: string, userData: UpdateUserRequest): Promise<User> {
     const response = await api.put<ApiResponse<User>>(`${this.BASE_URL}/${id}`, userData)
-    
+
     if (response.data.success && response.data.data) {
       return response.data.data
     }
-    
+
     throw new Error(response.data.message || 'Failed to update user')
   }
 
@@ -74,11 +75,11 @@ export class UserService {
       `${this.BASE_URL}/${id}/role`,
       { role }
     )
-    
+
     if (response.data.success && response.data.data) {
       return response.data.data
     }
-    
+
     throw new Error(response.data.message || 'Failed to change user role')
   }
 
@@ -91,11 +92,11 @@ export class UserService {
       null,
       { params: { blocked } }
     )
-    
+
     if (response.data.success && response.data.data) {
       return response.data.data
     }
-    
+
     throw new Error(response.data.message || 'Failed to toggle user block status')
   }
 }
