@@ -6,7 +6,7 @@ function toUpdateUserRequest(user: User): UpdateUserRequest {
   return {
     name: user.name,
     lastName: user.lastName,
-    phoneNumber: user.phoneNumber || '',
+    email: user.email,
   }
 }
 

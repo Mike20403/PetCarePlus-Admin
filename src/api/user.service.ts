@@ -15,7 +15,7 @@ export interface UserCriteria {
 export interface UpdateUserRequest {
   name?: string;
   lastName?: string;
-  phoneNumber?: string;
+  email?: string;
 }
 
 export interface ChangeUserRoleRequest {
@@ -58,13 +58,13 @@ export class UserService {
    * Update a user
    */
   static async updateUser(id: string, userData: UpdateUserRequest): Promise<User> {
-    const response = await api.put<ApiResponse<User>>(`${this.BASE_URL}/${id}`, userData)
+    const response = await api.put<User>(`${this.BASE_URL}/${id}`, userData)
 
-    if (response.data.success && response.data.data) {
-      return response.data.data
+    if (response.status === 200 && response.data) {
+      return response.data
     }
 
-    throw new Error(response.data.message || 'Failed to update user')
+    throw new Error('Failed to update user')
   }
 
   /**
