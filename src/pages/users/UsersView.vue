@@ -2,14 +2,15 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
 import { useUsers } from '@/hooks/useUsers'
-import type { User } from '@/types/user'
-import type { UserCriteria } from '@/api'
+import { useToast } from '@/hooks/useToast'
 
 import UserDetailModal from '@/components/user/UserDetailModal.vue'
 import UserEditModal from '@/components/user/UserEditModal.vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
-import { useToast } from '@/hooks/useToast'
+
+import type { User } from '@/types/user'
+import type { UserCriteria } from '@/api'
 
 const { users, fetchUsers, updateUser, blockUnblockUser } = useUsers()
 
@@ -127,7 +128,8 @@ const mappedUsers = computed(() => users.value.map(user => ({
   <DashboardLayout title="Users" subtitle="Manage system users and their permissions">
     <DataTable :page="page" :headers="userTableHeaders" :items="mappedUsers" :loading="fetchLoading" :totalItems="total"
       :title="'Users Management'" :hasActions="true" :itemsPerPageOptions="[10, 25, 50]"
-      @update:search="(val: string) => searchQuery = val" @update:pagination="handlePagination" @update:sort="() => { }">
+      @update:search="(val: string) => searchQuery = val" @update:pagination="handlePagination"
+      @update:sort="() => { }">
       <template #rowActions="{ item }">
         <div class="d-flex gap-2">
           <button class="btn btn-sm" @click.prevent="openUserDetail(item as unknown as User)" title="View detail">
