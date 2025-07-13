@@ -51,7 +51,7 @@ const form = ref<User>({
 
 const roleOptions = computed(() => [
   { value: 'ADMIN', text: 'Admin' },
-  { value: 'MANAGER', text: 'Manager' },
+  { value: 'SERVICE_PROVIDER', text: 'Service Provider' },
   { value: 'USER', text: 'User' }
 ])
 

@@ -1,6 +1,10 @@
 import { api } from './axios'
-import type { Withdrawal, WithdrawalStatus } from '@/types/withdrawal'
-import type { ApiResponse } from '@/types/common'
+import type { Withdrawal, WithdrawalStatus, WithdrawalActionRequest, ListWithdrawalResponse } from '@/types/withdrawal'
+
+export interface WithdrawalCriteria {
+  status?: WithdrawalStatus;
+  query?: string;
+}
 
 export class WithdrawalsService {
 	private static readonly BASE_URL = '/admin/withdrawals'
@@ -8,73 +12,88 @@ export class WithdrawalsService {
 	/**
 	 * Get all withdrawals with pagination
 	 */
-	static async getWithdrawals(page: number = 1, size: number = 10): Promise<Withdrawal[]> {
-		const response = await api.get(this.BASE_URL, {
-			params: { page, size }
-		})
-		return response.data as Withdrawal[]
+	static async getWithdrawals(
+		criteria?: WithdrawalCriteria,
+		page: number = 1,
+		size: number = 10,
+		sortBy: string = 'createdAt',
+		sort: 'asc' | 'desc' = 'desc'
+	): Promise<ListWithdrawalResponse> {
+		const params = { ...criteria, page, size, sortBy, sort }
+		const response = await api.get<ListWithdrawalResponse>(this.BASE_URL, { params })
+		return response.data
 	}
 
+	/**
+	 * Get withdrawal by ID
+	 */
 	static async getWithdrawalById(id: string): Promise<Withdrawal> {
-		const response = await api.get(`${this.BASE_URL}/${id}`)
-		return response.data as Withdrawal
+		const response = await api.get<Withdrawal>(`${this.BASE_URL}/${id}`)
+		
+		if (response.status === 200 && response.data) {
+			return response.data
+		}
+		
+		throw new Error(response.statusText || 'Failed to get withdrawal')
 	}
 
 	/**
 	 * Approve a withdrawal request
 	 */
-	static async approveWithdrawal(withdrawalId: string, adminNote?: string): Promise<Withdrawal> {
-		const response = await api.post<ApiResponse<Withdrawal>>(
-			`${this.BASE_URL}/${withdrawalId}/approve`,
-			{ adminNote: adminNote || 'Approved by admin' }
-		)
+	static async approveWithdrawal(withdrawalId: string, data?: WithdrawalActionRequest): Promise<Withdrawal> {
+		console.log('API: Approving withdrawal', withdrawalId, 'with data:', data)
 		
-		if (response.data.success && response.data.data) {
-			return response.data.data
+		try {
+			const response = await api.post<Withdrawal>(
+				`${this.BASE_URL}/${withdrawalId}/approve`,
+				data || {}
+			)
+			
+			console.log('API: Approve response:', response.status, response.data)
+			
+			if ((response.status === 200 || response.status === 201) && response.data) {
+				return response.data
+			}
+			
+			console.error('Approve withdrawal failed:', response)
+			throw new Error(response.statusText || 'Failed to approve withdrawal')
+		} catch (error) {
+			console.error('API: Error approving withdrawal:', error)
+			throw error
 		}
-		
-		throw new Error(response.data.message || 'Failed to approve withdrawal')
 	}
 
 	/**
 	 * Reject a withdrawal request
 	 */
-	static async rejectWithdrawal(withdrawalId: string, rejectionReason: string): Promise<Withdrawal> {
-		const response = await api.post<ApiResponse<Withdrawal>>(
+	static async rejectWithdrawal(withdrawalId: string, data: WithdrawalActionRequest): Promise<Withdrawal> {
+		const response = await api.post<Withdrawal>(
 			`${this.BASE_URL}/${withdrawalId}/reject`,
-			{ rejectionReason }
+			data
 		)
 		
-		if (response.data.success && response.data.data) {
-			return response.data.data
+		if ((response.status === 200 || response.status === 201) && response.data) {
+			return response.data
 		}
 		
-		throw new Error(response.data.message || 'Failed to reject withdrawal')
+		console.error('Reject withdrawal failed:', response)
+		throw new Error(response.statusText || 'Failed to reject withdrawal')
 	}
 
 	/**
 	 * Complete a withdrawal (mark as completed after bank transfer)
 	 */
-	static async completeWithdrawal(withdrawalId: string, transactionNote?: string): Promise<Withdrawal> {
-		const response = await api.post<ApiResponse<Withdrawal>>(
+	static async completeWithdrawal(withdrawalId: string, data?: WithdrawalActionRequest): Promise<Withdrawal> {
+		const response = await api.post<Withdrawal>(
 			`${this.BASE_URL}/${withdrawalId}/complete`,
-			{ transactionNote: transactionNote || 'Bank transfer completed' }
+			data || {}
 		)
 		
-		if (response.data.success && response.data.data) {
-			return response.data.data
+		if ((response.status === 200 || response.status === 201) && response.data) {
+			return response.data
 		}
 		
-		throw new Error(response.data.message || 'Failed to complete withdrawal')
-	}
-
-	static async getWithdrawalsByUser(userId: string): Promise<Withdrawal[]> {
-		const response = await api.get(`${this.BASE_URL}/user/${userId}`)
-		return response.data as Withdrawal[]
-	}
-
-	static async getWithdrawalsByStatus(status: WithdrawalStatus): Promise<Withdrawal[]> {
-		const response = await api.get(`${this.BASE_URL}/status/${status}`)
-		return response.data as Withdrawal[]
+		console.error('Complete withdrawal failed:', response)
+		throw new Error(response.statusText || 'Failed to complete withdrawal')
 	}
 }

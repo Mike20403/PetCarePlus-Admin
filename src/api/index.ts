@@ -8,7 +8,7 @@ export { BookingsService, type BookingCriteria } from '@/api/bookings.service'
 export { ServicesService, type ServiceCriteria } from '@/api/services.service'
 export { PetsService, type PetCriteria } from '@/api/pets.service'
 export { TermsService } from '@/api/terms.service'
-export { WithdrawalsService } from '@/api/withdrawals.service'
+export { WithdrawalsService, type WithdrawalCriteria } from '@/api/withdrawals.service'
 
 // Re-export types for convenience from the new type files
 export type { ApiResponse, ApiError, PaginationParams, ListResponse, AppSettings } from '@/types/common'
@@ -22,6 +22,7 @@ export type {
 	Withdrawal,
 	WithdrawalRequest,
 	WithdrawalActionRequest,
+	ListWithdrawalResponse
 } from '@/types/withdrawal'
 
 // User service types

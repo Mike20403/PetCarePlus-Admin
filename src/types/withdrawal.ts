@@ -34,3 +34,11 @@ export interface WithdrawalActionRequest {
 	rejectionReason?: string;
 	transactionNote?: string;
 }
+
+export interface ListWithdrawalResponse {
+	page: number;
+	pages: number;
+	size: number;
+	total: number;
+	items: Withdrawal[];
+}
