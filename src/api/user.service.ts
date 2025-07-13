@@ -71,46 +71,38 @@ export class UserService {
    * Change user role
    */
   static async changeUserRole(id: string, role: string): Promise<User> {
-    const response = await api.put<ApiResponse<User>>(
+    const response = await api.put<User>(
       `${this.BASE_URL}/${id}/role`,
       { role }
     )
-
-    if (response.data.success && response.data.data) {
-      return response.data.data
-    }
-
-    throw new Error(response.data.message || 'Failed to change user role')
-  }
-
-  /**
-   * Block/Unblock a user
-   */
-  static async toggleUserBlockStatus(id: string, blocked: boolean): Promise<User> {
-    const response = await api.put<ApiResponse<User>>(
-      `${this.BASE_URL}/${id}/block`,
-      null,
-      { params: { blocked } }
-    )
-
-    if (response.data.success && response.data.data) {
-      return response.data.data
-    }
-
-    throw new Error(response.data.message || 'Failed to toggle user block status')
-  }
-
-  /**
-   * Delete a user
-   */
-  static async blockUnblockUser(id: string, blocked: boolean): Promise<User> {
-    const response = await api.put<User>(`${this.BASE_URL}/${id}/block`, null, { params: { blocked } })
 
     if (response.status === 200 && response.data) {
       return response.data
     }
 
-    throw new Error(response.statusText || 'Failed to block/unblock user')
+    throw new Error(response.statusText || 'Failed to change user role')
+  }
+
+  /**
+   * Block a user
+   */
+  static async blockUser(id: string): Promise<User> {
+    const response = await api.patch<User>(`${this.BASE_URL}/${id}/block`)
+    if (response.status === 200 && response.data) {
+      return response.data
+    }
+    throw new Error(response.statusText || 'Failed to block user')
+  }
+
+  /**
+   * Unblock a user
+   */
+  static async unblockUser(id: string): Promise<User> {
+    const response = await api.patch<User>(`${this.BASE_URL}/${id}/unblock`)
+    if (response.status === 200 && response.data) {
+      return response.data
+    }
+    throw new Error(response.statusText || 'Failed to unblock user')
   }
 }
 
@@ -131,7 +123,10 @@ export const userService = {
   changeUserRole(id: string, role: string) {
     return api.put(`/admin/users/${id}/role`, { role });
   },
-  toggleUserBlockStatus(id: string, blocked: boolean) {
-    return api.put(`/admin/users/${id}/block`, null, { params: { blocked } });
+  blockUser(id: string) {
+    return UserService.blockUser(id);
+  },
+  unblockUser(id: string) {
+    return UserService.unblockUser(id);
   }
 };

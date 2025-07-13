@@ -12,7 +12,7 @@ import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import type { User } from '@/types/user'
 import type { UserCriteria } from '@/api'
 
-const { users, fetchUsers, updateUser, blockUnblockUser } = useUsers()
+const { users, fetchUsers, updateUser, blockUser, unblockUser, changeUserRole } = useUsers()
 
 defineProps({
   isOpen: {
@@ -46,8 +46,19 @@ const handleBlock = (id: string) => {
     `Are you sure you want to ${item.blockedAt ? 'unblock' : 'block'} this user?`,
     `${item.blockedAt ? 'Unblock' : 'Block'} User`,
     async () => {
-      await blockUnblockUser(id, !item.blockedAt)
-      await fetchAndSetUsers()
+      try {
+        if (item.blockedAt) {
+          await unblockUser(id)
+        } else {
+          await blockUser(id)
+        }
+        await fetchAndSetUsers()
+      } catch (error: any) {
+        toast({
+          type: 'error',
+          message: error?.message || 'Có lỗi xảy ra khi block/unblock user.'
+        })
+      }
     }
   )
 }
@@ -59,7 +70,12 @@ const openUserDetail = async (user: User) => {
 const handleEditSave = async (user: User) => {
   fetchLoading.value = true
   try {
+    const oldUser = users.value.find(u => u.id === user.id)
+    if (oldUser && oldUser.role !== user.role) {
+      await changeUserRole(user.id, user.role)
+    }
     await updateUser(user.id, user)
+    await fetchAndSetUsers()
     toast({
       type: 'success',
       message: 'User updated successfully'

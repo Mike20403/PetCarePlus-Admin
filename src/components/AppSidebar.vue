@@ -69,14 +69,7 @@
 							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Services</span>
 						</RouterLink>
 					</li>
-				</ul>
-			</div>
-
-			<!-- Operations Section -->
-			<div class="nav-section">
-				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">Operations</div>
-				<ul class="nav-items">
-					<li class="nav-item">
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
 						<RouterLink to="/pets" class="nav-link" active-class="active">
 							<span class="nav-link-icon">
 								<IconPaw />
@@ -84,6 +77,13 @@
 							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Pets</span>
 						</RouterLink>
 					</li>
+				</ul>
+			</div>
+
+			<!-- Operations Section -->
+			<div class="nav-section">
+				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">Operations</div>
+				<ul class="nav-items">
 					<li class="nav-item">
 						<RouterLink to="/appointments" class="nav-link" active-class="active">
 							<span class="nav-link-icon">

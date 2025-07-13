@@ -13,8 +13,6 @@
       <FormInput label="Email" name="email" :modelValue="form.email" readonly type="email" />
       <FormInput label="Phone Number" name="phoneNumber" v-model="form.phoneNumber" type="tel" />
       <FormSelect label="Role" name="role" v-model="form.role" :options="roleOptions" />
-      <FormInput label="Created At" name="createdAt" :modelValue="form.createdAt" readonly />
-      <FormInput label="Updated At" name="updatedAt" :modelValue="form.updatedAt" readonly />
       <div class="d-flex gap-2 mt-3">
         <button type="submit" class="btn btn-success">Save</button>
         <button type="button" class="btn btn-secondary" @click="close">Cancel</button>

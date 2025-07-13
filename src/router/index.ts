@@ -47,6 +47,12 @@ const router = createRouter({
 			meta: { requiresAuth: true, title: 'Services', roles: ['ADMIN'] }
 		},
 		{
+			path: '/pets',
+			name: 'pets',
+			component: () => import('@/pages/pets/PetsView.vue'),
+			meta: { requiresAuth: true, title: 'Pets', roles: ['ADMIN'] }
+		},
+		{
 			path: '/terms',
 			name: 'terms',
 			component: () => import('@/pages/terms/TermsView.vue'),

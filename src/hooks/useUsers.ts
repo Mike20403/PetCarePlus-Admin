@@ -41,12 +41,12 @@ export function useUsers() {
     return UserService.changeUserRole(id, role)
   }
 
-  async function toggleUserBlockStatus(id: string, blocked: boolean) {
-    return UserService.toggleUserBlockStatus(id, blocked)
+  async function blockUser(id: string) {
+    return UserService.blockUser(id)
   }
 
-  async function blockUnblockUser(id: string, blocked: boolean) {
-    return UserService.blockUnblockUser(id, blocked)
+  async function unblockUser(id: string) {
+    return UserService.unblockUser(id)
   }
 
   return {
@@ -57,7 +57,7 @@ export function useUsers() {
     getUserById,
     updateUser,
     changeUserRole,
-    toggleUserBlockStatus,
-    blockUnblockUser
+    blockUser,
+    unblockUser
   }
 }
