@@ -15,6 +15,7 @@
       :items="mappedServices"
       :loading="fetchLoading"
       :page="currentPage"
+      :perPage="pageSize"
       :totalItems="total"
       :itemsPerPageOptions="[10, 25, 50]"
       :hasActions="true"

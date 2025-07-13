@@ -206,6 +206,7 @@ const mappedUsers = computed(() => users.value.map(user => ({
   <DashboardLayout title="Users" subtitle="Manage system users and their permissions">
     <DataTable 
       :page="page" 
+      :perPage="size"
       :headers="userTableHeaders" 
       :items="mappedUsers" 
       :loading="fetchLoading" 

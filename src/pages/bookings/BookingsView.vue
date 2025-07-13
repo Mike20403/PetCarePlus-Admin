@@ -5,13 +5,88 @@
       :items="mappedBookings"
       :loading="fetchLoading"
       :page="currentPage"
+      :perPage="pageSize"
       :totalItems="total"
       :itemsPerPageOptions="[10, 25, 50]"
       :hasActions="true"
-      @update:search="searchQuery = $event"
+      :hideSearch="true"
       @update:pagination="handlePagination"
       @update:sort="() => {}"
+      title="Bookings management"
     >
+      <template #customFilters>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <!-- Search Input -->
+          <div class="input-icon">
+            <input 
+              type="text" 
+              class="form-control form-control-md" 
+              placeholder="Search by customer name, email, service name,..." 
+              v-model="searchQuery" 
+              @input="handleSearch"
+            />
+            <span class="input-icon-addon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <circle cx="10" cy="10" r="7"/>
+                <path d="m21 21-6-6"/>
+              </svg>
+            </span>
+          </div>
+          
+          <!-- Status Filter -->
+          <select class="form-select w-auto" v-model="selectedStatus">
+            <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- Payment Status Filter -->
+          <select class="form-select w-auto" v-model="selectedPaymentStatus">
+            <option v-for="option in paymentStatusOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- User ID Filter -->
+          <input 
+            type="text" 
+            class="form-control form-control-md" 
+            placeholder="User ID" 
+            v-model="userId"
+            @input="handleFilterChange"
+            style="width: 120px;"
+          />
+          
+          <!-- Provider ID Filter -->
+          <input 
+            type="text" 
+            class="form-control form-control-md" 
+            placeholder="Provider ID" 
+            v-model="providerId"
+            @input="handleFilterChange"
+            style="width: 120px;"
+          />
+          
+          <!-- Is Deleted Filter -->
+          <select class="form-select w-auto" v-model="selectedIsDeleted">
+            <option v-for="option in isDeletedOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- Reset Button -->
+          <button class="btn btn-outline-secondary btn-sm" @click="resetFilters" title="Reset all filters">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/>
+              <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
+            </svg>
+            Reset
+          </button>
+        </div>
+      </template>
+      
       <template #rowActions="{ item }">
         <button class="btn btn-sm btn-outline-primary" @click.prevent="openBookingDetail(item as unknown as Booking)">View</button>
       </template>
@@ -27,13 +102,47 @@ import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
 import { useBookings } from '@/hooks/useBookings'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import type { Booking } from '@/types/booking'
+import type { BookingCriteria } from '@/api/bookings.service'
 import { BookingDetailModal } from '@/components/booking'
 
 const { bookings, fetchBookings, total } = useBookings()
+
+// Filter states
 const fetchLoading = ref(false)
 const searchQuery = ref('')
+const selectedStatus = ref('')
+const selectedPaymentStatus = ref('')
+const userId = ref('')
+const providerId = ref('')
+const selectedIsDeleted = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
+
+// Filter options
+const statusOptions = [
+  { value: '', label: 'All Status' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'ACCEPTED', label: 'Accepted' },
+  { value: 'ONGOING', label: 'Ongoing' },
+  { value: 'SERVICE_DONE', label: 'Service Done' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' }
+]
+
+const paymentStatusOptions = [
+  { value: '', label: 'All Payment Status' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'FAILED', label: 'Failed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+  { value: 'REFUNDED', label: 'Refunded' }
+]
+
+const isDeletedOptions = [
+  { value: '', label: 'All Records' },
+  { value: 'false', label: 'Active' },
+  { value: 'true', label: 'Deleted' }
+]
 
 const detailBookingModal = ref<InstanceType<typeof BookingDetailModal> | null>(null)
 
@@ -54,15 +163,71 @@ const mappedBookings = computed(() => bookings.value.map(booking => ({
   pets: booking.petList.map(pet => `${pet.petName} (${pet.serviceName}) - $${pet.price}`).join(', ')
 })))
 
+// Build search criteria
+const buildCriteria = (): BookingCriteria => {
+  const criteria: BookingCriteria = {}
+  
+  if (searchQuery.value.trim()) {
+    criteria.query = searchQuery.value.trim()
+  }
+  
+  if (selectedStatus.value && selectedStatus.value !== '') {
+    criteria.status = selectedStatus.value
+  }
+  
+  if (selectedPaymentStatus.value && selectedPaymentStatus.value !== '') {
+    criteria.paymentStatus = selectedPaymentStatus.value
+  }
+  
+  if (userId.value.trim()) {
+    criteria.userId = userId.value.trim()
+  }
+  
+  if (providerId.value.trim()) {
+    criteria.providerId = providerId.value.trim()
+  }
+  
+  if (selectedIsDeleted.value && selectedIsDeleted.value !== '') {
+    criteria.isDeleted = selectedIsDeleted.value === 'true'
+  }
+  
+  return criteria
+}
+
 async function fetchAndSetBookings() {
   fetchLoading.value = true
-  await fetchBookings(currentPage.value, pageSize.value, undefined, 'asc', searchQuery.value ? { query: searchQuery.value } : undefined)
+  const criteria = buildCriteria()
+  
+  console.log('Booking search criteria:', criteria)
+  
+  await fetchBookings(currentPage.value, pageSize.value, undefined, 'asc', criteria)
   fetchLoading.value = false
 }
 
 const handlePagination = (p: number, s: number) => {
   currentPage.value = p
   pageSize.value = s
+  fetchAndSetBookings()
+}
+
+const handleSearch = () => {
+  currentPage.value = 1  // Reset to first page when searching
+  fetchAndSetBookings()
+}
+
+const handleFilterChange = () => {
+  currentPage.value = 1  // Reset to first page when filters change
+  fetchAndSetBookings()
+}
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  selectedStatus.value = ''
+  selectedPaymentStatus.value = ''
+  userId.value = ''
+  providerId.value = ''
+  selectedIsDeleted.value = ''
+  currentPage.value = 1
   fetchAndSetBookings()
 }
 
@@ -74,7 +239,15 @@ onMounted(() => {
   fetchAndSetBookings()
 })
 
-watch([searchQuery, currentPage, pageSize], fetchAndSetBookings)
+// Watch for filter changes with debounce for search input
+let searchTimeout: ReturnType<typeof setTimeout>
+watch(searchQuery, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(handleSearch, 300)
+})
+
+// Watch for other filter changes
+watch([selectedStatus, selectedPaymentStatus, userId, providerId, selectedIsDeleted], handleFilterChange)
 </script>
 
 <style scoped>

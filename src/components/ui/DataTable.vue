@@ -16,16 +16,6 @@
         </div>
         <div class="ms-auto d-flex">
           <slot name="customFilters"></slot>
-          <div v-if="!hideSearch && !$slots.customFilters" class="d-flex">
-            <select class="form-select w-auto" v-model="filterColumn">
-              <option value="">Filter by column</option>
-              <option v-for="header in headers" :key="header.key" :value="header.key">
-                {{ header.title }}
-              </option>
-            </select>
-            <input type="text" class="form-control ms-2" placeholder="Filter value..." v-model="filterValue"
-              @input="onFilter" :disabled="!filterColumn" />
-          </div>
         </div>
       </div>
 
@@ -179,6 +169,10 @@ const props = defineProps({
   page: {
     type: Number,
     default: 1
+  },
+  perPage: {
+    type: Number,
+    default: undefined
   }
 });
 
@@ -193,10 +187,16 @@ const emit = defineEmits<DataTableEmits>();
 
 // Pagination (controlled)
 const currentPage = ref(props.page);
-const itemsPerPage = ref(props.itemsPerPageOptions[0]);
+const itemsPerPage = ref(props.perPage || props.itemsPerPageOptions[0]);
 
 watch(() => props.page, (val) => {
   currentPage.value = val;
+});
+
+watch(() => props.perPage, (val) => {
+  if (val !== undefined) {
+    itemsPerPage.value = val;
+  }
 });
 
 const totalPages = computed(() => {
@@ -219,6 +219,7 @@ function nextPage() {
 
 function onItemsPerPageChange(e: Event) {
   const value = Number((e.target as HTMLSelectElement).value);
+  itemsPerPage.value = value; // Update internal value first
   emit('update:pagination', 1, value); // Reset to page 1 on size change
 }
 

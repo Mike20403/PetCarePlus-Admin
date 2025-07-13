@@ -15,12 +15,14 @@
       :items="mappedPets"
       :loading="fetchLoading"
       :page="currentPage"
+      :perPage="pageSize"
       :totalItems="total"
       :itemsPerPageOptions="[10, 25, 50]"
       :hasActions="true"
       @update:search="searchQuery = $event"
       @update:pagination="handlePagination"
       @update:sort="() => {}"
+      title="Pets management"
     >
       <template #rowActions="{ item }">
         <button class="btn btn-sm" @click.prevent="openPetDetail(item as unknown as Pet)">View</button>

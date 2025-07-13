@@ -8,6 +8,7 @@
       :hideSearch="false"
       title="Notifications Management"
       :page="page"
+      :perPage="size"
       :totalItems="total"
       :itemsPerPageOptions="[10, 25, 50]"
       @update:search="(val: string) => searchQuery = val"
