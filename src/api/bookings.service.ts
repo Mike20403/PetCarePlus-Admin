@@ -46,21 +46,7 @@ export class BookingsService {
 	 * Get a single booking by ID
 	 */
 	static async getBooking(id: string): Promise<Booking> {
-		const response = await api.get<ApiResponse<Booking>>(`${this.BASE_URL}/${id}`)
-		
-		if (response.data.success && response.data.data) {
-			return response.data.data
-		}
-		
-		throw new Error(response.data.message || 'Failed to get booking')
-	}
-
-	static async deleteBooking(id: string): Promise<void> {
-		await api.delete<ApiResponse<void>>(`${this.BASE_URL}/${id}`)
-	}
-
-	static async changeBookingStatus(id: string, status: Booking['status']): Promise<Booking> {
-		const response = await api.put<ApiResponse<Booking>>(`${this.BASE_URL}/${id}/status`, { status })
-		return response.data.data
+		const response = await api.get<Booking>(`${this.BASE_URL}/${id}`)	
+		return response.data
 	}
 }

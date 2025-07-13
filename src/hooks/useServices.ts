@@ -29,6 +29,23 @@ export function useServices() {
     }
   }
 
+  async function searchServicesAdvanced(criteria: ServiceCriteria, page = 1, size = 10, sortBy = 'createdAt', sort: 'asc' | 'desc' = 'asc') {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await ServicesService.searchServicesAdvanced(criteria, page, size, sortBy, sort)
+      services.value = res.content
+      total.value = res.totalElements
+      pages.value = res.totalPages
+      pageSize.value = res.size
+      return res
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Failed to search services'
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function createService(data: ServiceRequest) {
     return ServicesService.createService(data)
   }
@@ -47,6 +64,6 @@ export function useServices() {
 
   return {
     services, loading, error, total, pages, currentPage, pageSize,
-    fetchServices, createService, updateService, deleteService, getService
+    fetchServices, searchServicesAdvanced, createService, updateService, deleteService, getService
   }
 } 

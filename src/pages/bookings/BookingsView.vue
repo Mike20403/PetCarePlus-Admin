@@ -12,10 +12,12 @@
       @update:pagination="handlePagination"
       @update:sort="() => {}"
     >
-      <template #rowActions="{}">
-        <button class="btn btn-sm" @click.prevent>View</button>
+      <template #rowActions="{ item }">
+        <button class="btn btn-sm btn-outline-primary" @click.prevent="openBookingDetail(item as unknown as Booking)">View</button>
       </template>
     </DataTable>
+
+    <BookingDetailModal ref="detailBookingModal" />
   </DashboardLayout>
 </template>
 
@@ -24,12 +26,16 @@ import { ref, onMounted, watch, computed } from 'vue'
 import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
 import { useBookings } from '@/hooks/useBookings'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
+import type { Booking } from '@/types/booking'
+import { BookingDetailModal } from '@/components/booking'
 
 const { bookings, fetchBookings, total } = useBookings()
 const fetchLoading = ref(false)
 const searchQuery = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
+
+const detailBookingModal = ref<InstanceType<typeof BookingDetailModal> | null>(null)
 
 const bookingTableHeaders: DataTableHeader[] = [
   { key: 'customerName', title: 'Customer', sortable: true },
@@ -58,6 +64,10 @@ const handlePagination = (p: number, s: number) => {
   currentPage.value = p
   pageSize.value = s
   fetchAndSetBookings()
+}
+
+const openBookingDetail = (bookingData: Booking) => {
+  detailBookingModal.value?.open(bookingData.id)
 }
 
 onMounted(() => {

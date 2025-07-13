@@ -65,65 +65,6 @@ export const useBookingsStore = defineStore('bookings', () => {
     }
   }
 
-  async function updateBookingStatus(id: string, status: Booking['status']) {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      const response = await BookingsService.changeBookingStatus(id, status)
-
-      // Update the booking in the local state
-      const index = bookings.value.findIndex(booking => booking.id === id)
-      if (index !== -1) {
-        bookings.value[index] = response
-      }
-
-      toast({
-        type: 'success',
-        message: 'Booking status updated successfully'
-      })
-      return response
-    } catch (err) {
-      error.value = 'Failed to update booking status'
-      toast({
-        type: 'error',
-        message: 'Failed to update booking status'
-      })
-      console.error(err)
-      return null
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  async function deleteBooking(id: string) {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      await BookingsService.deleteBooking(id)
-
-      // Remove the booking from the local state
-      bookings.value = bookings.value.filter(booking => booking.id !== id)
-
-      toast({
-        type: 'success',
-        message: 'Booking deleted successfully'
-      })
-      return true
-    } catch (err) {
-      error.value = 'Failed to delete booking'
-      toast({
-        type: 'error',
-        message: 'Failed to delete booking'
-      })
-      console.error(err)
-      return false
-    } finally {
-      isLoading.value = false
-    }
-  }
-
   return {
     bookings,
     isLoading,
@@ -134,8 +75,6 @@ export const useBookingsStore = defineStore('bookings', () => {
     completedBookings,
     cancelledBookings,
     fetchBookings,
-    fetchBookingById,
-    updateBookingStatus,
-    deleteBooking
+    fetchBookingById
   }
 })

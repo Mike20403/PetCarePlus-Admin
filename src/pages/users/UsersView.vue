@@ -27,12 +27,33 @@ const { toast } = useToast()
 const fetchLoading = ref(false)
 const confirmationDialog = ref<InstanceType<typeof ConfirmationDialog> | null>(null)
 
-const searchQuery = ref<string>('')
 const selectedRole = ref<string>('')
+const selectedStatus = ref<string>('')
+const selectedEmailVerified = ref<string>('')
 const page = ref<number>(1)
 const size = ref<number>(10)
 const total = ref<number>(0)
 const pages = ref<number>(1)
+
+// Filter options
+const roleOptions = [
+  { value: '', label: 'All Roles' },
+  { value: 'USER', label: 'User' },
+  { value: 'ADMIN', label: 'Admin' },
+  { value: 'SERVICE_PROVIDER', label: 'Service Provider' }
+]
+
+const statusOptions = [
+  { value: '', label: 'All Status' },
+  { value: 'active', label: 'Active' },
+  { value: 'blocked', label: 'Blocked' }
+]
+
+const emailVerifiedOptions = [
+  { value: '', label: 'All Email Status' },
+  { value: 'true', label: 'Verified' },
+  { value: 'false', label: 'Not Verified' }
+]
 
 const openEditUserModal = (user: User) => {
   editUserModal.value?.open(user.id)
@@ -71,15 +92,31 @@ const handleEditSave = async (user: User) => {
   fetchLoading.value = true
   try {
     const oldUser = users.value.find(u => u.id === user.id)
+    let hasChanges = false
+    
+    // Chỉ gọi changeUserRole nếu role thay đổi
     if (oldUser && oldUser.role !== user.role) {
       await changeUserRole(user.id, user.role)
+      hasChanges = true
     }
-    await updateUser(user.id, user)
-    await fetchAndSetUsers()
-    toast({
-      type: 'success',
-      message: 'User updated successfully'
-    })
+    
+    // Chỉ gọi updateUser nếu có thay đổi về name, lastName, hoặc email
+    if (oldUser && (
+      oldUser.name !== user.name || 
+      oldUser.lastName !== user.lastName || 
+      oldUser.email !== user.email
+    )) {
+      await updateUser(user.id, user)
+      hasChanges = true
+    }
+    
+    if (hasChanges) {
+      await fetchAndSetUsers()
+      toast({
+        type: 'success',
+        message: 'User updated successfully'
+      })
+    }
   } catch (error: unknown) {
     toast({
       type: 'error',
@@ -94,8 +131,23 @@ async function fetchAndSetUsers() {
   fetchLoading.value = true
 
   const criteria: UserCriteria = {}
-  if (searchQuery.value) criteria.query = searchQuery.value
-  if (selectedRole.value) criteria.roles = [selectedRole.value]
+  
+  // Chỉ truyền roles khi thực sự được chọn (không phải "All Roles")
+  if (selectedRole.value && selectedRole.value !== '') {
+    criteria.roles = selectedRole.value
+  }
+  
+  // Chỉ truyền isBlocked khi thực sự được chọn (không phải "All Status")  
+  if (selectedStatus.value && selectedStatus.value !== '') {
+    criteria.isBlocked = selectedStatus.value === 'blocked'
+  }
+  
+  // Chỉ truyền isEmailActivated khi thực sự được chọn (không phải "All Email Status")
+  if (selectedEmailVerified.value && selectedEmailVerified.value !== '') {
+    criteria.isEmailActivated = selectedEmailVerified.value === 'true'
+  }
+
+  console.log('User search criteria:', criteria)
 
   const res = await fetchUsers(criteria, page.value, size.value, 'createdAt', 'asc')
 
@@ -115,18 +167,29 @@ const handlePagination = (p: number, s: number) => {
   fetchAndSetUsers()
 }
 
+const resetFilters = () => {
+  selectedRole.value = ''
+  selectedStatus.value = ''
+  selectedEmailVerified.value = ''
+  page.value = 1
+  fetchAndSetUsers()
+}
+
 onMounted(async () => {
   await fetchAndSetUsers()
 })
 
-watch([searchQuery, selectedRole, page, size], fetchAndSetUsers)
+// Watch for filter changes
+watch([selectedRole, selectedStatus, selectedEmailVerified], () => {
+  page.value = 1  // Reset to first page when filters change
+  fetchAndSetUsers()
+})
 
 const userTableHeaders: DataTableHeader[] = [
   { key: 'name', title: 'Name', sortable: true },
   { key: 'email', title: 'Email', sortable: true },
   { key: 'role', title: 'Role', sortable: true },
   { key: 'status', title: 'Status', sortable: false, type: 'status' },
-  { key: 'phoneNumber', title: 'Phone', sortable: false },
   { key: 'emailVerifiedAt', title: 'Email Verified', sortable: false },
   { key: 'createdAt', title: 'Created', sortable: true, type: 'date' }
 ]
@@ -141,10 +204,54 @@ const mappedUsers = computed(() => users.value.map(user => ({
 
 <template>
   <DashboardLayout title="Users" subtitle="Manage system users and their permissions">
-    <DataTable :page="page" :headers="userTableHeaders" :items="mappedUsers" :loading="fetchLoading" :totalItems="total"
-      :title="'Users Management'" :hasActions="true" :itemsPerPageOptions="[10, 25, 50]"
-      @update:search="(val: string) => searchQuery = val" @update:pagination="handlePagination"
+    <DataTable 
+      :page="page" 
+      :headers="userTableHeaders" 
+      :items="mappedUsers" 
+      :loading="fetchLoading" 
+      :totalItems="total"
+      :title="'Users Management'" 
+      :hasActions="true" 
+      :itemsPerPageOptions="[10, 25, 50]"
+      :hideSearch="true"
+      @update:pagination="handlePagination"
       @update:sort="() => { }">
+      
+      <template #customFilters>
+        <div class="d-flex gap-2 align-items-center">
+          <!-- Role Filter -->
+          <select class="form-select w-auto" v-model="selectedRole">
+            <option v-for="option in roleOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- Status Filter -->
+          <select class="form-select w-auto" v-model="selectedStatus">
+            <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- Email Verified Filter -->
+          <select class="form-select w-auto" v-model="selectedEmailVerified">
+            <option v-for="option in emailVerifiedOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- Reset Button -->
+          <button class="btn btn-outline-secondary btn-sm" @click="resetFilters" title="Reset all filters">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/>
+              <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
+            </svg>
+            Reset
+          </button>
+        </div>
+      </template>
+      
       <template #rowActions="{ item }">
         <div class="d-flex gap-2">
           <button class="btn btn-sm" @click.prevent="openUserDetail(item as unknown as User)" title="View detail">

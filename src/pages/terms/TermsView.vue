@@ -17,7 +17,7 @@
           :loading="fetchLoading"
           :hasActions="true"
           :hideSearch="false"
-          title="Terms & Policies"
+          title="Terms & Policies management"
           @update:sort="() => {}"
         >
           <template #customFilters>
@@ -34,6 +34,16 @@
                 <option value="vi">Vietnamese</option>
                 <option value="en">English</option>
               </select>
+              
+              <!-- Reset Button -->
+              <button class="btn btn-outline-secondary btn-sm" @click="resetFilters" title="Reset all filters">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/>
+                  <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
+                </svg>
+                Reset
+              </button>
             </div>
           </template>
       <template #rowActions="{ item }">
@@ -150,6 +160,12 @@ const handleLanguageFilter = async () => {
   } else {
     await fetchAndSetTerms()
   }
+}
+
+const resetFilters = () => {
+  selectedType.value = ''
+  selectedLanguage.value = ''
+  fetchAndSetTerms()
 }
 
 function getTermTypeLabel(type: TermsType): string {

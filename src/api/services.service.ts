@@ -12,7 +12,7 @@ export class ServicesService {
 	private static readonly BASE_URL = '/admin/services'
 
 	/**
-	 * Get all services with pagination
+	 * Get all services with pagination and basic search
 	 */
 	static async getServices(
 		criteria?: ServiceCriteria,
@@ -30,6 +30,43 @@ export class ServicesService {
 			totalPages: data.totalPages || 1,
 			page: data.number || 1,
 			size: data.size || size
+		}
+	}
+
+	/**
+	 * Advanced search services with all filters
+	 */
+	static async searchServicesAdvanced(
+		criteria: ServiceCriteria,
+		page: number = 1,
+		size: number = 10,
+		sortBy: string = 'createdAt',
+		sort: 'asc' | 'desc' = 'asc'
+	): Promise<{ content: Service[]; totalElements: number; totalPages: number; page: number; size: number; }> {
+		const params = {
+			...criteria,
+			page,
+			size,
+			sortBy,
+			sort
+		}
+		
+		console.log('Advanced search API call with params:', params)
+		
+		try {
+			const response = await api.get(`${this.BASE_URL}/search/advanced`, { params })
+			console.log('Advanced search response:', response.data)
+			const data = response.data as { content: Service[]; totalElements: number; totalPages: number; number: number; size: number }
+			return {
+				content: data.content || [],
+				totalElements: data.totalElements || 0,
+				totalPages: data.totalPages || 1,
+				page: data.number || 1,
+				size: data.size || size
+			}
+		} catch (error) {
+			console.error('Advanced search API error:', error)
+			throw error
 		}
 	}
 
@@ -83,27 +120,5 @@ export class ServicesService {
 			console.error('Delete service failed:', response)
 			throw new Error(response.statusText || 'Failed to delete service')
 		}
-	}
-
-	/**
-	 * Advanced search for services with filtering
-	 */
-	static async searchServices(
-		criteria: ServiceCriteria,
-		page: number = 1,
-		size: number = 10,
-		sortBy?: string,
-		sort: 'asc' | 'desc' = 'asc'
-	): Promise<Service[]> {
-		const params = {
-			...criteria,
-			page,
-			size,
-			sortBy,
-			sort
-		}
-		
-		const response = await api.get(`${this.BASE_URL}/search/advanced`, { params })
-		return response.data as Service[]
 	}
 }

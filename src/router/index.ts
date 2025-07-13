@@ -65,6 +65,12 @@ const router = createRouter({
 			meta: { requiresAuth: true, title: 'Withdrawals', roles: ['ADMIN'] }
 		},
 		{
+			path: '/notifications',
+			name: 'notifications',
+			component: () => import('@/pages/notifications/NotificationsView.vue'),
+			meta: { requiresAuth: true, title: 'Notifications', roles: ['ADMIN'] }
+		},
+		{
 			path: '/:pathMatch(.*)*',
 			name: 'not-found',
 			component: () => import('@/pages/NotFoundView.vue'),

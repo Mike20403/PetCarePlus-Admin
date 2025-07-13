@@ -11,6 +11,7 @@
       @update:search="searchQuery = $event"
       @update:pagination="handlePagination"
       @update:sort="() => {}"
+      title="Withdrawals management"
     >
       <template #rowActions="{ item }">
         <button 

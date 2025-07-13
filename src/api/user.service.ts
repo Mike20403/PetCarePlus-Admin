@@ -3,7 +3,7 @@ import type { User } from '@/types/user'
 import type { ListUserResponse } from '@/types/user'
 
 export interface UserCriteria {
-  roles?: string[];
+  roles?: string;
   createdAtStart?: string;
   createdAtEnd?: string;
   isBlocked?: boolean;

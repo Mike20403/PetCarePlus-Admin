@@ -131,6 +131,14 @@
 				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">System</div>
 				<ul class="nav-items">
 					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
+						<RouterLink to="/notifications" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconBell />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Notifications</span>
+						</RouterLink>
+					</li>
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
 						<RouterLink to="/terms" class="nav-link" active-class="active">
 							<span class="nav-link-icon">
 								<IconFile />
@@ -181,7 +189,8 @@ import {
 	IconFile, 
 	IconSettings, 
 	IconLogout, 
-	IconPaw, 
+	IconPaw,
+	IconBell,
 } from '@tabler/icons-vue'
 
 const authStore = useAuthStore()

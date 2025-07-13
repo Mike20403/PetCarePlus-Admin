@@ -8,10 +8,42 @@
       </div>
     </div>
     <form v-else @submit.prevent="onSave">
-      <FormInput label="Name" name="name" v-model="form.name" />
-      <FormInput label="Description" name="description" v-model="form.description" />
-      <FormInput label="Icon URL" name="iconUrl" v-model="form.iconUrl" />
-      <FormInput label="Base Price" name="basePrice" v-model="form.basePrice" type="number" />
+      <!-- Basic Information -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <h6 class="mb-3 text-muted">Basic Information</h6>
+        </div>
+        <div class="col-md-6">
+          <FormInput label="Name" name="name" v-model="form.name" />
+        </div>
+        <div class="col-md-6">
+          <FormInput label="Base Price" name="basePrice" v-model="form.basePrice" type="number" />
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <FormTextarea label="Description" name="description" v-model="form.description" :rows="4" />
+        </div>
+      </div>
+
+      <!-- Icon Information -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <h6 class="mb-3 text-muted">Icon Information</h6>
+        </div>
+        <div class="col-12">
+          <FormInput label="Icon URL" name="iconUrl" v-model="form.iconUrl" />
+        </div>
+        <div class="col-12 mt-2" v-if="form.iconUrl">
+          <div class="d-flex align-items-center gap-2">
+            <span class="text-muted">Preview:</span>
+            <img :src="form.iconUrl" alt="Service Icon" class="service-icon-preview" />
+          </div>
+        </div>
+      </div>
+
       <div class="d-flex gap-2 mt-3">
         <button type="submit" class="btn btn-success">{{ isCreate ? 'Create' : 'Save' }}</button>
         <button type="button" class="btn btn-secondary" @click="close">Cancel</button>
@@ -22,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FormInput } from '../forms'
+import { FormInput, FormTextarea } from '../forms'
 import type { Service } from '@/types/service'
 import { useServices } from '@/hooks/useServices'
 import { useToast } from '@/hooks/useToast'
@@ -109,4 +141,22 @@ defineExpose({
   open,
   close,
 })
-</script> 
+</script>
+
+<style scoped>
+.service-icon-preview {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border: 1px solid var(--tblr-border-color);
+  border-radius: 4px;
+  padding: 4px;
+}
+
+h6.text-muted {
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--tblr-border-color-light);
+  padding-bottom: 0.5rem;
+}
+</style> 

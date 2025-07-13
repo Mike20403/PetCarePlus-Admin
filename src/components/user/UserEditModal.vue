@@ -8,11 +8,25 @@
       </div>
     </div>
     <form v-else @submit.prevent="onSave">
-      <FormInput label="Name" name="name" v-model="form.name" />
-      <FormInput label="Last Name" name="lastName" v-model="form.lastName" />
-      <FormInput label="Email" name="email" :modelValue="form.email" readonly type="email" />
-      <FormInput label="Phone Number" name="phoneNumber" v-model="form.phoneNumber" type="tel" />
-      <FormSelect label="Role" name="role" v-model="form.role" :options="roleOptions" />
+      <!-- Personal Information -->
+      <div class="row">
+        <div class="col-md-6">
+          <FormInput label="Name" name="name" v-model="form.name" />
+        </div>
+        <div class="col-md-6">
+          <FormInput label="Last Name" name="lastName" v-model="form.lastName" />
+        </div>
+      </div>
+      
+      <!-- Contact and Role -->
+      <div class="row">
+        <div class="col-md-8">
+          <FormInput label="Email" name="email" :modelValue="form.email" readonly type="email" />
+        </div>
+        <div class="col-md-4">
+          <FormSelect label="Role" name="role" v-model="form.role" :options="roleOptions" />
+        </div>
+      </div>
       <div class="d-flex gap-2 mt-3">
         <button type="submit" class="btn btn-success">Save</button>
         <button type="button" class="btn btn-secondary" @click="close">Cancel</button>

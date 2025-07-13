@@ -8,13 +8,35 @@
       </div>
     </div>
     <div v-else>
-      <FormInput disabled label="Name" name="name" :modelValue="user?.name" readonly />
-      <FormInput disabled label="Last Name" name="lastName" :modelValue="user?.lastName" readonly />
-      <FormInput disabled label="Email" name="email" :modelValue="user?.email" readonly type="email" />
-      <FormInput disabled label="Phone Number" name="phoneNumber" :modelValue="user?.phoneNumber" readonly type="tel" />
-      <FormInput disabled label="Role" name="role" :modelValue="user?.role" readonly />
-      <FormInput disabled label="Created At" name="createdAt" :modelValue="user?.createdAt" readonly />
-      <FormInput disabled label="Updated At" name="updatedAt" :modelValue="user?.updatedAt" readonly />
+      <!-- Personal Information -->
+      <div class="row">
+        <div class="col-md-6">
+          <FormInput disabled label="Name" name="name" :modelValue="user?.name" readonly />
+        </div>
+        <div class="col-md-6">
+          <FormInput disabled label="Last Name" name="lastName" :modelValue="user?.lastName" readonly />
+        </div>
+      </div>
+      
+      <!-- Contact Information -->
+      <div class="row">
+        <div class="col-md-8">
+          <FormInput disabled label="Email" name="email" :modelValue="user?.email" readonly type="email" />
+        </div>
+        <div class="col-md-4">
+          <FormInput disabled label="Role" name="role" :modelValue="user?.role" readonly />
+        </div>
+      </div>
+      
+      <!-- System Information -->
+      <div class="row">
+        <div class="col-md-6">
+          <FormInput disabled label="Created At" name="createdAt" :modelValue="user?.createdAt" readonly />
+        </div>
+        <div class="col-md-6">
+          <FormInput disabled label="Updated At" name="updatedAt" :modelValue="user?.updatedAt" readonly />
+        </div>
+      </div>
     </div>
   </AppModal>
 </template>
