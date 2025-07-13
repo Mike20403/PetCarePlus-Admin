@@ -61,6 +61,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import { useToast } from '@/hooks/useToast'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import type { Notification, NotificationCriteria } from '@/types/notification'
+import { NotificationType } from '@/types/notification'
 import { NotificationDetailModal } from '@/components/notification'
 
 const { notifications, fetchNotifications, loading } = useNotifications()
@@ -121,7 +122,7 @@ async function fetchAndSetNotifications() {
     const criteria: NotificationCriteria = {}
     
     if (selectedType.value) {
-      criteria.type = selectedType.value as any
+      criteria.type = selectedType.value as NotificationType
     }
     
     if (selectedStatus.value) {

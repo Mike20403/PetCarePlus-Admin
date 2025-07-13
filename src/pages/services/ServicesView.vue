@@ -32,11 +32,13 @@
               type="text" 
               class="form-control" 
               placeholder="Search services..." 
-              v-model="searchQuery" 
-              @input="handleSearch"
+              v-model="searchQuery"
             />
             <span class="input-icon-addon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <div v-if="searchLoading" class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Searching...</span>
+              </div>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <circle cx="10" cy="10" r="7"/>
                 <path d="m21 21-6-6"/>
@@ -104,11 +106,12 @@ import ServiceEditModal from '@/components/service/ServiceEditModal.vue'
 import ServiceDetailModal from '@/components/service/ServiceDetailModal.vue'
 
 const authStore = useAuthStore()
-const { services, fetchServices, searchServicesAdvanced, deleteService, loading, total, currentPage, pageSize } = useServices()
+const { services, searchServicesAdvanced, deleteService, loading, total, currentPage, pageSize } = useServices()
 const { toast } = useToast()
 
 // Search and filter states
 const searchQuery = ref('')
+const searchLoading = ref(false)
 const minPrice = ref<number | undefined>()
 const maxPrice = ref<number | undefined>()
 
@@ -159,9 +162,10 @@ const handlePagination = (p: number, s: number) => {
   fetchAndSetServices()
 }
 
-const handleSearch = () => {
+const handleSearch = async () => {
   currentPage.value = 1  // Reset to first page when searching
-  fetchAndSetServices()
+  await fetchAndSetServices()
+  searchLoading.value = false
 }
 
 const handleFilterChange = () => {
@@ -184,7 +188,12 @@ onMounted(fetchAndSetServices)
 let searchTimeout: ReturnType<typeof setTimeout>
 watch(searchQuery, () => {
   clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(handleSearch, 300)
+  if (searchQuery.value.trim()) {
+    searchLoading.value = true
+  } else {
+    searchLoading.value = false
+  }
+  searchTimeout = setTimeout(handleSearch, 800) // 2 seconds debounce
 })
 
 // Watch for other filter changes

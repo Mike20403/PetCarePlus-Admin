@@ -62,7 +62,7 @@
       </div>
       
       <!-- Additional Information -->
-      <FormTextarea disabled label="Notes" name="booking-detail-notes" :modelValue="booking.notes || 'No notes'" readonly />
+      <FormTextarea disabled label="Notes" name="booking-detail-notes" :modelValue="booking.note || 'No notes'" readonly />
       
       <!-- System Information -->
       <div class="row">

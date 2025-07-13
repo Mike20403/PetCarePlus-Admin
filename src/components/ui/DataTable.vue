@@ -234,18 +234,6 @@ function onSearch() {
   }, 300);
 }
 
-// Filter
-const filterColumn = ref('');
-const filterValue = ref('');
-const debouncedFilter = ref();
-
-function onFilter() {
-  clearTimeout(debouncedFilter.value);
-  debouncedFilter.value = setTimeout(() => {
-    emit('update:filter', filterColumn.value, filterValue.value);
-  }, 300);
-}
-
 // Sorting
 const sortKey = ref('');
 const sortDirection = ref<'asc' | 'desc'>('asc');

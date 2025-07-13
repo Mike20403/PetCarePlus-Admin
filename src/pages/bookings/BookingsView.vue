@@ -22,11 +22,13 @@
               type="text" 
               class="form-control form-control-md" 
               placeholder="Search by customer name, email, service name,..." 
-              v-model="searchQuery" 
-              @input="handleSearch"
+              v-model="searchQuery"
             />
             <span class="input-icon-addon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <div v-if="searchLoading" class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Searching...</span>
+              </div>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <circle cx="10" cy="10" r="7"/>
                 <path d="m21 21-6-6"/>
@@ -77,11 +79,11 @@
           
           <!-- Reset Button -->
           <button class="btn btn-outline-secondary btn-sm" @click="resetFilters" title="Reset all filters">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
               <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/>
               <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
-            </svg>
+                  </svg>
             Reset
           </button>
         </div>
@@ -109,6 +111,7 @@ const { bookings, fetchBookings, total } = useBookings()
 
 // Filter states
 const fetchLoading = ref(false)
+const searchLoading = ref(false)
 const searchQuery = ref('')
 const selectedStatus = ref('')
 const selectedPaymentStatus = ref('')
@@ -210,9 +213,10 @@ const handlePagination = (p: number, s: number) => {
   fetchAndSetBookings()
 }
 
-const handleSearch = () => {
+const handleSearch = async () => {
   currentPage.value = 1  // Reset to first page when searching
-  fetchAndSetBookings()
+  await fetchAndSetBookings()
+  searchLoading.value = false
 }
 
 const handleFilterChange = () => {
@@ -243,7 +247,12 @@ onMounted(() => {
 let searchTimeout: ReturnType<typeof setTimeout>
 watch(searchQuery, () => {
   clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(handleSearch, 300)
+  if (searchQuery.value.trim()) {
+    searchLoading.value = true
+  } else {
+    searchLoading.value = false
+  }
+  searchTimeout = setTimeout(handleSearch, 800) // 2 seconds debounce
 })
 
 // Watch for other filter changes

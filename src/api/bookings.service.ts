@@ -1,6 +1,5 @@
 import { api } from './axios'
 import type { Booking } from '@/types/booking'
-import type { ApiResponse } from '@/types/common'
 
 export interface BookingCriteria {
   query?: string;

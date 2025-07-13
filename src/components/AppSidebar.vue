@@ -340,9 +340,6 @@ onMounted(() => {
 	gap: 0.2rem;
 }
 
-.nav-item {
-	/* No margin needed */
-}
 
 .nav-link {
 	display: flex;
