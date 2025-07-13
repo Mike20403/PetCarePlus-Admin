@@ -70,8 +70,8 @@ async function loadService(id: string) {
   try {
     const found = await getService(id)
     if (found) form.value = { ...found }
-  } catch (error) {
-    toast({ type: 'error', message: 'Failed to load service' })
+  } catch (error: unknown) {
+    toast({ type: 'error', message: (error as Error).message || 'Failed to load service' })
   } finally {
     loading.value = false
   }
@@ -98,8 +98,7 @@ async function onSave() {
     }
     emit('save')
     close()
-  } catch (error) {
-    console.error('Error saving service:', error)
+  } catch (error: unknown) {
     toast({ type: 'error', message: (error as Error).message || 'Failed to save service' })
   } finally {
     loading.value = false

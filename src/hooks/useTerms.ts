@@ -7,16 +7,38 @@ export function useTerms() {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchTerms(language = 'en') {
+  async function fetchTerms(language = 'vi') {
     loading.value = true
     error.value = null
     try {
       terms.value = await TermsService.getTerms(language)
+      return terms.value
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch terms'
+      throw e
     } finally {
       loading.value = false
     }
+  }
+
+  async function fetchAllTerms() {
+    loading.value = true
+    error.value = null
+    try {
+      terms.value = await TermsService.getTermsAllLanguages()
+      return terms.value
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Failed to fetch all terms'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+
+
+  async function getTermsByType(type: TermsType, language = 'vi') {
+    return TermsService.getTermsByType(type, language)
   }
 
   async function createTerm(data: CreateTermsRequest) {
@@ -27,17 +49,16 @@ export function useTerms() {
     return TermsService.updateTerm(id, data)
   }
 
-  async function getTermsByType(type: TermsType, language = 'en') {
-    return TermsService.getTermsByType(type, language)
-  }
+
 
   return {
     terms,
     loading,
     error,
     fetchTerms,
+    fetchAllTerms,
+    getTermsByType,
     createTerm,
-    updateTerm,
-    getTermsByType
+    updateTerm
   }
 } 

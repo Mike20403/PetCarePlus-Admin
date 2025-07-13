@@ -1,5 +1,4 @@
 import { api } from './axios'
-import type { ApiResponse } from '@/types/common'
 import type { User } from '@/types/user'
 import type { ListUserResponse } from '@/types/user'
 

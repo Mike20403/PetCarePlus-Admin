@@ -12,8 +12,7 @@
       @update:pagination="handlePagination"
       @update:sort="() => {}"
     >
-      <template #rowActions="{ item }">
-        <!-- Tuỳ chỉnh action cho từng booking nếu cần -->
+      <template #rowActions="{}">
         <button class="btn btn-sm" @click.prevent>View</button>
       </template>
     </DataTable>
@@ -24,11 +23,9 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
 import { useBookings } from '@/hooks/useBookings'
-import { useToast } from '@/hooks/useToast'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 
-const { bookings, fetchBookings, total, page, size, totalPages } = useBookings()
-const { toast } = useToast()
+const { bookings, fetchBookings, total } = useBookings()
 const fetchLoading = ref(false)
 const searchQuery = ref('')
 const currentPage = ref(1)

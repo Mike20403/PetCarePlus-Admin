@@ -1,6 +1,6 @@
 import { api } from './axios'
 import type { Service, ServiceRequest, ServicePatchRequest } from '@/types/service'
-import type { ApiResponse } from '@/types/common'
+
 
 export interface ServiceCriteria {
   query?: string;

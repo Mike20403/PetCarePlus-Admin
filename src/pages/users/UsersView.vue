@@ -53,10 +53,10 @@ const handleBlock = (id: string) => {
           await blockUser(id)
         }
         await fetchAndSetUsers()
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast({
           type: 'error',
-          message: error?.message || 'Có lỗi xảy ra khi block/unblock user.'
+          message: (error as Error).message || 'Có lỗi xảy ra khi block/unblock user.'
         })
       }
     }
@@ -80,8 +80,7 @@ const handleEditSave = async (user: User) => {
       type: 'success',
       message: 'User updated successfully'
     })
-  } catch (error) {
-    console.error('Failed to update user:', error)
+  } catch (error: unknown) {
     toast({
       type: 'error',
       message: (error as Error).message || 'Failed to update user'

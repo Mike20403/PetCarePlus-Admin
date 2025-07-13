@@ -32,7 +32,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { FormInput, FormSelect, FormTextarea } from '@/components/forms'
-import type { Pet } from '@/types/pet'
 import { usePets } from '@/hooks/usePets'
 import { useToast } from '@/hooks/useToast'
 import AppModal from '@/components/AppModal.vue'
@@ -115,8 +114,8 @@ async function loadPet(id: string) {
         ownerId: found.userId
       }
     }
-  } catch (error) {
-    toast({ type: 'error', message: 'Failed to load pet' })
+  } catch (error: unknown) {
+    toast({ type: 'error', message: (error as Error).message || 'Failed to load pet' })
   } finally {
     loading.value = false
   }
@@ -159,8 +158,7 @@ async function onSave() {
     }
     emit('save')
     close()
-  } catch (error) {
-    console.error('Error saving pet:', error)
+  } catch (error: unknown) {
     toast({ type: 'error', message: (error as Error).message || 'Failed to save pet' })
   } finally {
     loading.value = false

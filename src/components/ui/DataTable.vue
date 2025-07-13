@@ -7,22 +7,25 @@
       </div>
     </div>
     <div class="card-body">
-      <div class="d-flex justify-content-between mb-3">
-        <div class="input-icon">
+      <div v-if="!hideSearch || $slots.customFilters" class="d-flex justify-content-between mb-3">
+        <div v-if="!hideSearch" class="input-icon">
           <input type="text" class="form-control" placeholder="Search..." v-model="searchQuery" @input="onSearch" />
           <span class="input-icon-addon">
             <IconSearch />
           </span>
         </div>
         <div class="ms-auto d-flex">
-          <select class="form-select w-auto" v-model="filterColumn">
-            <option value="">Filter by column</option>
-            <option v-for="header in headers" :key="header.key" :value="header.key">
-              {{ header.title }}
-            </option>
-          </select>
-          <input type="text" class="form-control ms-2" placeholder="Filter value..." v-model="filterValue"
-            @input="onFilter" :disabled="!filterColumn" />
+          <slot name="customFilters"></slot>
+          <div v-if="!hideSearch && !$slots.customFilters" class="d-flex">
+            <select class="form-select w-auto" v-model="filterColumn">
+              <option value="">Filter by column</option>
+              <option v-for="header in headers" :key="header.key" :value="header.key">
+                {{ header.title }}
+              </option>
+            </select>
+            <input type="text" class="form-control ms-2" placeholder="Filter value..." v-model="filterValue"
+              @input="onFilter" :disabled="!filterColumn" />
+          </div>
         </div>
       </div>
 
@@ -162,6 +165,10 @@ const props = defineProps({
     default: ''
   },
   hasActions: {
+    type: Boolean,
+    default: false
+  },
+  hideSearch: {
     type: Boolean,
     default: false
   },

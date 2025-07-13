@@ -44,13 +44,10 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
 import { useWithdrawals } from '@/hooks/useWithdrawals'
-import { useToast } from '@/hooks/useToast'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import type { Withdrawal } from '@/types/withdrawal'
 import WithdrawalActionModal from '@/components/withdrawal/WithdrawalActionModal.vue'
 
 const { withdrawals, fetchWithdrawals, loading, total, currentPage, pageSize } = useWithdrawals()
-const { toast } = useToast()
 const searchQuery = ref('')
 const fetchLoading = loading
 

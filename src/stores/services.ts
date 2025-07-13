@@ -18,7 +18,7 @@ export const useServicesStore = defineStore('services', () => {
 
     try {
       const response = await ServicesService.getServices()
-      services.value = response
+      services.value = response.content
     } catch (err) {
       error.value = 'Failed to fetch services'
       toast({

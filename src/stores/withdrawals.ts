@@ -39,7 +39,7 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
 
     try {
       const response = await WithdrawalsService.getWithdrawals()
-      withdrawals.value = response
+      withdrawals.value = response.items
     } catch (err) {
       error.value = 'Failed to fetch withdrawals'
       toast({
@@ -80,7 +80,9 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     try {
       const response = await WithdrawalsService.approveWithdrawal(
         id,
-        notes
+        {
+          adminNote: notes
+        }
       )
 
       // Update the withdrawal in the local state
@@ -114,7 +116,9 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     try {
       const response = await WithdrawalsService.rejectWithdrawal(
         id,
-        notes || 'Rejected by admin'
+        {
+          adminNote: notes || 'Rejected by admin'
+        }
       )
 
       // Update the withdrawal in the local state
@@ -146,8 +150,8 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     error.value = null
 
     try {
-      const response = await WithdrawalsService.getWithdrawalsByUser(userId)
-      return response
+      const response = await WithdrawalsService.getWithdrawals({ query: userId })
+      return response.items
     } catch (err) {
       error.value = 'Failed to fetch user withdrawals'
       toast({
@@ -166,8 +170,8 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
     error.value = null
 
     try {
-      const response = await WithdrawalsService.getWithdrawalsByStatus(status)
-      return response
+      const response = await WithdrawalsService.getWithdrawals({ status })
+      return response.items
     } catch (err) {
       error.value = `Failed to fetch ${status} withdrawals`
       toast({
