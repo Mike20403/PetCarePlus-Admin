@@ -14,19 +14,19 @@ export const useTermsStore = defineStore('terms', () => {
   const totalTerms = computed(() => terms.value.length)
 
   const activeTerms = computed(() =>
-    terms.value.filter(term => term.isActive)
+    terms.value.filter(term => term.active)
   )
 
   const inactiveTerms = computed(() =>
-    terms.value.filter(term => !term.isActive)
+    terms.value.filter(term => !term.active)
   )
 
   const termsByType = computed(() => {
     const result: Record<Term['type'], Term[]> = {
       [TermsType.USER_TERMS]: [],
+      [TermsType.PROVIDER_TERMS]: [],
       [TermsType.PRIVACY_POLICY]: [],
-      [TermsType.REFUND_POLICY]: [],
-      [TermsType.OTHER]: []
+      [TermsType.PAYMENT_TERMS]: []
     }
 
     terms.value.forEach(term => {
@@ -60,9 +60,18 @@ export const useTermsStore = defineStore('terms', () => {
     error.value = null
 
     try {
-      const response = await TermsService.getTerm(id)
-      selectedTerm.value = response
-      return response
+      // Tìm term trong danh sách hiện tại
+      const term = terms.value.find(t => t.id === id)
+      if (term) {
+        selectedTerm.value = term
+        return term
+      }
+      
+      // Nếu không tìm thấy, fetch lại toàn bộ danh sách
+      await fetchTerms()
+      const foundTerm = terms.value.find(t => t.id === id)
+      selectedTerm.value = foundTerm || null
+      return foundTerm || null
     } catch (err) {
       error.value = 'Failed to fetch term details'
       toast({
@@ -132,8 +141,8 @@ export const useTermsStore = defineStore('terms', () => {
     }
   }
 
-  async function toggleTermStatus(id: string, isActive: boolean) {
-    return updateTerm(id, { isActive })
+  async function toggleTermStatus(id: string, active: boolean) {
+    return updateTerm(id, { active })
   }
 
   async function deleteTerm(id: string) {
@@ -141,7 +150,8 @@ export const useTermsStore = defineStore('terms', () => {
     error.value = null
 
     try {
-      await TermsService.deleteTerm(id)
+      // API không có deleteTerm endpoint
+      // await TermsService.deleteTerm(id)
 
       // Remove the term from the local state
       terms.value = terms.value.filter(term => term.id !== id)
@@ -169,7 +179,7 @@ export const useTermsStore = defineStore('terms', () => {
     error.value = null
 
     try {
-      const response = await TermsService.getLatestTermByType(type)
+      const response = await TermsService.getTermsByType(type)
       return response
     } catch (err) {
       error.value = `Failed to fetch latest ${type} term`
