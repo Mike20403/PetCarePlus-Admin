@@ -1,9 +1,9 @@
 import { api } from './axios'
-import type { ApiResponse } from '@/types/common'
-import type { ListUserResponse, User } from '@/types/user'
+import type { User } from '@/types/user'
+import type { ListUserResponse } from '@/types/user'
 
 export interface UserCriteria {
-  roles?: string[];
+  roles?: string;
   createdAtStart?: string;
   createdAtEnd?: string;
   isBlocked?: boolean;
@@ -14,7 +14,7 @@ export interface UserCriteria {
 export interface UpdateUserRequest {
   name?: string;
   lastName?: string;
-  phoneNumber?: string;
+  email?: string;
 }
 
 export interface ChangeUserRoleRequest {
@@ -33,8 +33,7 @@ export class UserService {
     size: number = 10,
     sortBy: string = 'createdAt',
     sort: 'asc' | 'desc' = 'asc'
-  ): Promise<ApiResponse<ListUserResponse>> {
-
+  ): Promise<ListUserResponse> {
     const params = {
       ...criteria,
       page,
@@ -42,8 +41,7 @@ export class UserService {
       sortBy,
       sort
     }
-
-    const response = await api.get<ApiResponse<ListUserResponse>>(this.BASE_URL, { params })
+    const response = await api.get<ListUserResponse>(this.BASE_URL, { params })
     return response.data
   }
 
@@ -51,59 +49,59 @@ export class UserService {
    * Get a user by ID
    */
   static async getUserById(id: string): Promise<User> {
-    const response = await api.get<ApiResponse<User>>(`${this.BASE_URL}/${id}`)
-    
-    if (response.data.success && response.data.data) {
-      return response.data.data
-    }
-    
-    throw new Error(response.data.message || 'Failed to get user')
+    const response = await api.get<User>(`${this.BASE_URL}/${id}`)
+    return response.data
   }
 
   /**
    * Update a user
    */
   static async updateUser(id: string, userData: UpdateUserRequest): Promise<User> {
-    const response = await api.put<ApiResponse<User>>(`${this.BASE_URL}/${id}`, userData)
-    
-    if (response.data.success && response.data.data) {
-      return response.data.data
+    const response = await api.put<User>(`${this.BASE_URL}/${id}`, userData)
+
+    if (response.status === 200 && response.data) {
+      return response.data
     }
-    
-    throw new Error(response.data.message || 'Failed to update user')
+
+    throw new Error('Failed to update user')
   }
 
   /**
    * Change user role
    */
   static async changeUserRole(id: string, role: string): Promise<User> {
-    const response = await api.put<ApiResponse<User>>(
+    const response = await api.put<User>(
       `${this.BASE_URL}/${id}/role`,
       { role }
     )
-    
-    if (response.data.success && response.data.data) {
-      return response.data.data
+
+    if (response.status === 200 && response.data) {
+      return response.data
     }
-    
-    throw new Error(response.data.message || 'Failed to change user role')
+
+    throw new Error(response.statusText || 'Failed to change user role')
   }
 
   /**
-   * Block/Unblock a user
+   * Block a user
    */
-  static async toggleUserBlockStatus(id: string, blocked: boolean): Promise<User> {
-    const response = await api.put<ApiResponse<User>>(
-      `${this.BASE_URL}/${id}/block`,
-      null,
-      { params: { blocked } }
-    )
-    
-    if (response.data.success && response.data.data) {
-      return response.data.data
+  static async blockUser(id: string): Promise<User> {
+    const response = await api.patch<User>(`${this.BASE_URL}/${id}/block`)
+    if (response.status === 200 && response.data) {
+      return response.data
     }
-    
-    throw new Error(response.data.message || 'Failed to toggle user block status')
+    throw new Error(response.statusText || 'Failed to block user')
+  }
+
+  /**
+   * Unblock a user
+   */
+  static async unblockUser(id: string): Promise<User> {
+    const response = await api.patch<User>(`${this.BASE_URL}/${id}/unblock`)
+    if (response.status === 200 && response.data) {
+      return response.data
+    }
+    throw new Error(response.statusText || 'Failed to unblock user')
   }
 }
 
@@ -124,7 +122,10 @@ export const userService = {
   changeUserRole(id: string, role: string) {
     return api.put(`/admin/users/${id}/role`, { role });
   },
-  toggleUserBlockStatus(id: string, blocked: boolean) {
-    return api.put(`/admin/users/${id}/block`, null, { params: { blocked } });
+  blockUser(id: string) {
+    return UserService.blockUser(id);
+  },
+  unblockUser(id: string) {
+    return UserService.unblockUser(id);
   }
 };

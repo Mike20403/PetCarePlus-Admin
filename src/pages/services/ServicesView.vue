@@ -1,7 +1,7 @@
 <template>
   <DashboardLayout title="Services" subtitle="Manage all pet care services">
     <template #actions>
-      <button v-if="authStore.hasRole('ADMIN')" @click="openCreateServiceModal" class="btn btn-primary">
+      <button v-if="authStore.hasRole('ADMIN')" @click="openEditServiceModal(null)" class="btn btn-primary">
         <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
           <path d="M12 5l0 14" />
@@ -10,150 +10,233 @@
         New Service
       </button>
     </template>
-
-    <div class="row row-cards">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Services Management</h3>
-            <div class="card-actions">
-              <div class="d-flex">
-                <input type="search" class="form-control me-3" placeholder="Search services..." aria-label="Search services">
-                <!-- Add filters as needed -->
+    <DataTable
+      :headers="serviceTableHeaders"
+      :items="mappedServices"
+      :loading="fetchLoading"
+      :page="currentPage"
+      :perPage="pageSize"
+      :totalItems="total"
+      :itemsPerPageOptions="[10, 25, 50]"
+      :hasActions="true"
+      :hideSearch="true"
+      @update:pagination="handlePagination"
+      @update:sort="() => {}"
+      title="Services management"
+    >
+      <template #customFilters>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <!-- Search Input -->
+          <div class="input-icon">
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Search services..." 
+              v-model="searchQuery"
+            />
+            <span class="input-icon-addon">
+              <div v-if="searchLoading" class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Searching...</span>
               </div>
-            </div>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <circle cx="10" cy="10" r="7"/>
+                <path d="m21 21-6-6"/>
+              </svg>
+            </span>
           </div>
-          <div class="table-responsive">
-            <table class="table table-vcenter table-mobile-md card-table">
-              <thead>
-                <tr>
-                  <th>Service</th>
-                  <th>Description</th>
-                  <th>Base Price</th>
-                  <th>Created</th>
-                  <th class="w-1">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="service in services" :key="service.id">
-                  <td data-label="Service">
-                    <div class="d-flex py-1 align-items-center">
-                      <span class="avatar me-2" :style="`background-image: url(${service.iconUrl})`"></span>
-                      <div class="flex-fill">
-                        <div class="font-weight-medium">{{ service.name }}</div>
-                        <div class="text-secondary">ID: {{ service.id }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td data-label="Description">
-                    <div>{{ service.description }}</div>
-                  </td>
-                  <td data-label="Base Price">
-                    <div>${{ service.basePrice }}</div>
-                  </td>
-                  <td data-label="Created">
-                    <div>{{ service.createdAt }}</div>
-                  </td>
-                  <td>
-                    <div class="btn-list flex-nowrap">
-                      <a href="#" class="btn btn-sm" @click.prevent="openEditServiceModal(service)">
-                        Edit
-                      </a>
-                      <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                          Actions
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-                          <a class="dropdown-item" href="#" @click.prevent="openEditServiceModal(service)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                              <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
-                              <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
-                              <path d="M16 5l3 3" />
-                            </svg>
-                            Edit Service
-                          </a>
-                          <a class="dropdown-item text-danger" href="#" @click.prevent="deleteServiceHandler(service.id)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                              <path d="M4 7l16 0" />
-                              <path d="M10 11l0 6" />
-                              <path d="M14 11l0 6" />
-                              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                            </svg>
-                            Delete Service
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          
+          <!-- Price Range -->
+          <div class="d-flex gap-1 align-items-center">
+            <span class="text-muted small">Price:</span>
+            <input 
+              type="number" 
+              class="form-control form-control-sm" 
+              placeholder="Min" 
+              v-model.number="minPrice"
+              @input="handleFilterChange"
+              style="width: 80px;"
+            />
+            <span class="text-muted">-</span>
+            <input 
+              type="number" 
+              class="form-control form-control-sm" 
+              placeholder="Max" 
+              v-model.number="maxPrice"
+              @input="handleFilterChange"
+              style="width: 80px;"
+            />
           </div>
-          <div class="card-footer d-flex align-items-center">
-            <p class="m-0 text-secondary">Showing <span>1</span> to <span>{{ services.length }}</span> of <span>{{ services.length }}</span> entries</p>
-            <ul class="pagination m-0 ms-auto">
-              <li class="page-item disabled">
-                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M15 6l-6 6l6 6" />
-                  </svg>
-                  prev
-                </a>
-              </li>
-              <li class="page-item active"><a class="page-link" href="#">1</a></li>
-              <li class="page-item disabled">
-                <a class="page-link" href="#">
-                  next
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M9 6l6 6l-6 6" />
-                  </svg>
-                </a>
-              </li>
-            </ul>
-          </div>
+          
+          <!-- Reset Button -->
+          <button class="btn btn-outline-secondary btn-sm" @click="resetFilters" title="Reset all filters">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/>
+              <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
+            </svg>
+            Reset
+          </button>
         </div>
-      </div>
-    </div>
+      </template>
+      
+      <template #rowActions="{ item }">
+        <button class="btn btn-sm" @click.prevent="openServiceDetail(item as unknown as Service)">View</button>
+        <button class="btn btn-sm" @click.prevent="openEditServiceModal(item as unknown as Service)">Edit</button>
+        <button class="btn btn-sm btn-danger" @click.prevent="deleteServiceHandler(item.id as string)">Delete</button>
+      </template>
+    </DataTable>
+    <ServiceDetailModal ref="detailServiceModal" />
+    <ServiceEditModal ref="editServiceModal" @save="handleEditSave" />
+    <ConfirmationDialog ref="confirmationDialog" />
   </DashboardLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import { useAuthStore } from '@/stores/auth'
+import { ref, onMounted, watch, computed } from 'vue'
+import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
 import { useServices } from '@/hooks/useServices'
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/hooks/useToast'
+import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import type { Service } from '@/types/service'
+import type { ServiceCriteria } from '@/api/services.service'
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
+import ServiceEditModal from '@/components/service/ServiceEditModal.vue'
+import ServiceDetailModal from '@/components/service/ServiceDetailModal.vue'
 
 const authStore = useAuthStore()
-const { services, fetchServices, deleteService } = useServices()
-const showServiceModal = ref(false)
-const currentService = ref<Service | null>(null)
+const { services, searchServicesAdvanced, deleteService, loading, total, currentPage, pageSize } = useServices()
+const { toast } = useToast()
 
-const openCreateServiceModal = () => {
-	currentService.value = null
-	showServiceModal.value = true
+// Search and filter states
+const searchQuery = ref('')
+const searchLoading = ref(false)
+const minPrice = ref<number | undefined>()
+const maxPrice = ref<number | undefined>()
+
+const fetchLoading = loading
+
+const serviceTableHeaders: DataTableHeader[] = [
+  { key: 'name', title: 'Service', sortable: true },
+  { key: 'description', title: 'Description', sortable: false },
+  { key: 'basePrice', title: 'Base Price', sortable: true, type: 'currency' },
+  { key: 'createdAt', title: 'Created', sortable: true, type: 'date' }
+]
+
+const mappedServices = computed(() => services.value.map(service => ({
+  ...service,
+  // format fields if needed
+})))
+
+// Build search criteria
+const buildCriteria = (): ServiceCriteria => {
+  const criteria: ServiceCriteria = {}
+  
+  if (searchQuery.value.trim()) {
+    criteria.query = searchQuery.value.trim()
+  }
+  
+  if (minPrice.value !== undefined && minPrice.value !== null && !isNaN(minPrice.value)) {
+    criteria.minPrice = minPrice.value
+  }
+  
+  if (maxPrice.value !== undefined && maxPrice.value !== null && !isNaN(maxPrice.value)) {
+    criteria.maxPrice = maxPrice.value
+  }
+  
+  return criteria
 }
 
-const openEditServiceModal = (service: Service) => {
-	currentService.value = service
-	showServiceModal.value = true
+async function fetchAndSetServices() {
+  const criteria = buildCriteria()
+  
+  // Always use advanced search for consistency
+  console.log('Using advanced search with criteria:', criteria)
+  await searchServicesAdvanced(criteria, currentPage.value, pageSize.value)
 }
 
-const deleteServiceHandler = async (serviceId: string) => {
-	if (confirm('Are you sure you want to delete this service?')) {
-		await deleteService(serviceId)
-		await fetchServices()
-	}
+const handlePagination = (p: number, s: number) => {
+  currentPage.value = p
+  pageSize.value = s
+  fetchAndSetServices()
 }
 
-onMounted(() => {
-	fetchServices()
+const handleSearch = async () => {
+  currentPage.value = 1  // Reset to first page when searching
+  await fetchAndSetServices()
+  searchLoading.value = false
+}
+
+const handleFilterChange = () => {
+  currentPage.value = 1  // Reset to first page when filters change
+  fetchAndSetServices()
+}
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  minPrice.value = undefined
+  maxPrice.value = undefined
+  currentPage.value = 1
+  fetchAndSetServices()
+}
+
+
+onMounted(fetchAndSetServices)
+
+// Watch for filter changes with debounce for search input
+let searchTimeout: ReturnType<typeof setTimeout>
+watch(searchQuery, () => {
+  clearTimeout(searchTimeout)
+  if (searchQuery.value.trim()) {
+    searchLoading.value = true
+  } else {
+    searchLoading.value = false
+  }
+  searchTimeout = setTimeout(handleSearch, 800) // 2 seconds debounce
 })
+
+// Watch for other filter changes
+watch([minPrice, maxPrice], handleFilterChange)
+
+const editServiceModal = ref<InstanceType<typeof ServiceEditModal> | null>(null)
+const confirmationDialog = ref<InstanceType<typeof ConfirmationDialog> | null>(null)
+const detailServiceModal = ref<InstanceType<typeof ServiceDetailModal> | null>(null)
+
+const openEditServiceModal = (service: Service | null) => {
+  editServiceModal.value?.open(service ? service.id : null)
+}
+
+const openServiceDetail = (service: Service) => {
+  detailServiceModal.value?.open(service.id)
+}
+
+const deleteServiceHandler = (serviceId: string) => {
+  console.log('deleteServiceHandler called with id:', serviceId)
+  confirmationDialog.value?.open(
+    'Are you sure you want to delete this service?',
+    'Delete Service',
+    async () => {
+      try {
+        console.log('Starting delete service:', serviceId)
+        await deleteService(serviceId)
+        console.log('Delete service completed, fetching data...')
+        await fetchAndSetServices()
+        console.log('Fetch completed, showing success toast')
+        toast({ type: 'success', message: 'Service deleted successfully' })
+      } catch (error) {
+        console.error('Error deleting service:', error)
+        toast({ type: 'error', message: 'Failed to delete service' })
+      }
+    }
+  )
+}
+
+const handleEditSave = async () => {
+  console.log('handleEditSave called')
+  await fetchAndSetServices()
+  console.log('fetchAndSetServices completed')
+}
 </script>
 
 <style scoped>
@@ -177,6 +260,13 @@ onMounted(() => {
 
 .dropdown-item-icon {
 	margin-right: 0.5rem;
+}
+
+.table td:nth-child(2), .table th:nth-child(2) {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 768px) {

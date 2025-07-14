@@ -11,16 +11,17 @@ export interface User {
 	email: string
 	name: string
 	lastName: string
-	phoneNumber: string
+	phoneNumber?: string
 	role: string
-	emailVerifiedAt: string | null
-	blockedAt: string | null
+	emailVerifiedAt?: string | null
+	blockedAt?: string | null
 	createdAt: string
 	updatedAt: string
-	deletedAt: string | null
+	deletedAt?: string | null
 }
 
-export type ListUserResponse = PaginationResponse<User>
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ListUserResponse extends PaginationResponse<User> {}
 
 export interface UserRequest {
 	name: string
@@ -34,7 +35,7 @@ export interface UserInfo {
 	email: string
 	name: string
 	lastName: string
-	phoneNumber: string
+	phoneNumber?: string
 	role: string
 	emailVerifiedAt: string | null
 	blockedAt: string | null

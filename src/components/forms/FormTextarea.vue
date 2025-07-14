@@ -1,7 +1,7 @@
 <template>
 	<div class="mb-3">
-		<label :for="name" class="form-label">{{ label }}</label>
-		<textarea :name="name" :id="name" :placeholder="placeholder" :value="modelValue"
+		<label :for="uniqueId" class="form-label">{{ label }}</label>
+		<textarea :name="name" :id="uniqueId" :placeholder="placeholder" :value="modelValue"
 			@input="updateValue($event)" class="form-control"
 			:class="{ 'is-invalid': error }" :rows="rows"></textarea>
 		<div v-if="error" class="invalid-feedback">
@@ -12,6 +12,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+
+let textareaIdCounter = 0
 
 export default defineComponent({
 	name: 'FormTextarea',
@@ -42,6 +44,11 @@ export default defineComponent({
 		},
 	},
 	emits: ['update:modelValue'],
+	data() {
+		return {
+			uniqueId: `${this.name}-${++textareaIdCounter}`
+		}
+	},
 	methods: {
 		updateValue(event: Event) {
 			const target = event.target as HTMLTextAreaElement;

@@ -10,7 +10,7 @@
 - Ensure all UI is responsive and consistent with the current design system.
 
 // Components & UI
-- Prioritize using existing components, icons, and libraries in the project (Tabler, @/components, @/common/components).
+- Prioritize using existing components, icons, and libraries in the project (Tabler, @/components, @/common/components). Currently the project is using components from Tabler so please make sure always use component from that https://docs.tabler.io/
 - Only implement new components when truly necessary or for special/complex requirements.
 - All components must be modular, maintainable, extensible, and as reusable as possible.
 - When being requested to implement a page. That page should have reusable component generated with props ( component that is newly generated must be reusable with props).

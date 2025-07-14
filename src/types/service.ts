@@ -1,3 +1,5 @@
+import type { PaginationResponse } from './pagination'
+
 // Service Types
 export interface Service {
 	id: string;
@@ -7,7 +9,7 @@ export interface Service {
 	basePrice: number;
 	createdAt: string;
 	updatedAt: string;
-	deletedAt: string | null;
+	deletedAt?: string | null;
 }
 
 export interface ServiceRequest {
@@ -22,4 +24,16 @@ export interface ServicePatchRequest {
 	description?: string;
 	basePrice?: number;
 	iconUrl?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ListServiceResponse extends PaginationResponse<Service> {}
+
+// Keep backward compatibility
+export interface LegacyListServiceResponse {
+	content: Service[];
+	totalElements: number;
+	totalPages: number;
+	page: number;
+	size: number;
 }

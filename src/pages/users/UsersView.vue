@@ -1,240 +1,337 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import { useAuthStore } from '@/stores/auth'
+import { ref, onMounted, watch, computed } from 'vue'
+import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
 import { useUsers } from '@/hooks/useUsers'
+import { useToast } from '@/hooks/useToast'
+
+import UserDetailModal from '@/components/user/UserDetailModal.vue'
+import UserEditModal from '@/components/user/UserEditModal.vue'
+import DashboardLayout from '@/layouts/DashboardLayout.vue'
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
+
 import type { User } from '@/types/user'
+import type { UserCriteria } from '@/api'
 
-const authStore = useAuthStore()
-const { users, fetchUsers } = useUsers()
-const showUserModal = ref(false)
-const currentUser = ref<User | null>(null)
+const { users, fetchUsers, updateUser, blockUser, unblockUser, changeUserRole } = useUsers()
 
-const openCreateUserModal = () => {
-	currentUser.value = null
-	showUserModal.value = true
-}
+defineProps({
+  isOpen: {
+    type: Boolean,
+    required: true
+  }
+})
+
+const detailUserModal = ref<InstanceType<typeof UserDetailModal> | null>(null)
+const editUserModal = ref<InstanceType<typeof UserEditModal> | null>(null)
+const { toast } = useToast()
+const fetchLoading = ref(false)
+const confirmationDialog = ref<InstanceType<typeof ConfirmationDialog> | null>(null)
+
+const selectedRole = ref<string>('')
+const selectedStatus = ref<string>('')
+const selectedEmailVerified = ref<string>('')
+const page = ref<number>(1)
+const size = ref<number>(10)
+const total = ref<number>(0)
+const pages = ref<number>(1)
+
+// Filter options
+const roleOptions = [
+  { value: '', label: 'All Roles' },
+  { value: 'USER', label: 'User' },
+  { value: 'ADMIN', label: 'Admin' },
+  { value: 'SERVICE_PROVIDER', label: 'Service Provider' }
+]
+
+const statusOptions = [
+  { value: '', label: 'All Status' },
+  { value: 'active', label: 'Active' },
+  { value: 'blocked', label: 'Blocked' }
+]
+
+const emailVerifiedOptions = [
+  { value: '', label: 'All Email Status' },
+  { value: 'true', label: 'Verified' },
+  { value: 'false', label: 'Not Verified' }
+]
 
 const openEditUserModal = (user: User) => {
-	currentUser.value = user
-	showUserModal.value = true
+  editUserModal.value?.open(user.id)
 }
 
-const deleteUser = async () => {
-	if (confirm('Are you sure you want to delete this user?')) {
-		await fetchUsers()
-	}
+const handleBlock = (id: string) => {
+  const item = users.value.find(user => user.id === id)
+  if (!item) return
+
+  confirmationDialog.value?.open(
+    `Are you sure you want to ${item.blockedAt ? 'unblock' : 'block'} this user?`,
+    `${item.blockedAt ? 'Unblock' : 'Block'} User`,
+    async () => {
+      try {
+        if (item.blockedAt) {
+          await unblockUser(id)
+        } else {
+          await blockUser(id)
+        }
+        await fetchAndSetUsers()
+      } catch (error: unknown) {
+        toast({
+          type: 'error',
+          message: (error as Error).message || 'Có lỗi xảy ra khi block/unblock user.'
+        })
+      }
+    }
+  )
 }
 
-onMounted(() => {
-	fetchUsers()
+const openUserDetail = async (user: User) => {
+  detailUserModal.value?.open(user.id)
+}
+
+const handleEditSave = async (user: User) => {
+  fetchLoading.value = true
+  try {
+    const oldUser = users.value.find(u => u.id === user.id)
+    let hasChanges = false
+    
+    // Chỉ gọi changeUserRole nếu role thay đổi
+    if (oldUser && oldUser.role !== user.role) {
+      await changeUserRole(user.id, user.role)
+      hasChanges = true
+    }
+    
+    // Chỉ gọi updateUser nếu có thay đổi về name, lastName, hoặc email
+    if (oldUser && (
+      oldUser.name !== user.name || 
+      oldUser.lastName !== user.lastName || 
+      oldUser.email !== user.email
+    )) {
+      await updateUser(user.id, user)
+      hasChanges = true
+    }
+    
+    if (hasChanges) {
+      await fetchAndSetUsers()
+      toast({
+        type: 'success',
+        message: 'User updated successfully'
+      })
+    }
+  } catch (error: unknown) {
+    toast({
+      type: 'error',
+      message: (error as Error).message || 'Failed to update user'
+    })
+  } finally {
+    fetchLoading.value = false
+  }
+}
+
+async function fetchAndSetUsers() {
+  fetchLoading.value = true
+
+  const criteria: UserCriteria = {}
+  
+  // Chỉ truyền roles khi thực sự được chọn (không phải "All Roles")
+  if (selectedRole.value && selectedRole.value !== '') {
+    criteria.roles = selectedRole.value
+  }
+  
+  // Chỉ truyền isBlocked khi thực sự được chọn (không phải "All Status")  
+  if (selectedStatus.value && selectedStatus.value !== '') {
+    criteria.isBlocked = selectedStatus.value === 'blocked'
+  }
+  
+  // Chỉ truyền isEmailActivated khi thực sự được chọn (không phải "All Email Status")
+  if (selectedEmailVerified.value && selectedEmailVerified.value !== '') {
+    criteria.isEmailActivated = selectedEmailVerified.value === 'true'
+  }
+
+  console.log('User search criteria:', criteria)
+
+  const res = await fetchUsers(criteria, page.value, size.value, 'createdAt', 'asc')
+
+  if (res) {
+    total.value = res.total || 0
+    pages.value = res.pages || 1
+    page.value = res.page || 1
+    users.value = res.items || []
+  }
+
+  fetchLoading.value = false
+}
+
+const handlePagination = (p: number, s: number) => {
+  page.value = p
+  size.value = s
+  fetchAndSetUsers()
+}
+
+const resetFilters = () => {
+  selectedRole.value = ''
+  selectedStatus.value = ''
+  selectedEmailVerified.value = ''
+  page.value = 1
+  fetchAndSetUsers()
+}
+
+onMounted(async () => {
+  await fetchAndSetUsers()
 })
+
+// Watch for filter changes
+watch([selectedRole, selectedStatus, selectedEmailVerified], () => {
+  page.value = 1  // Reset to first page when filters change
+  fetchAndSetUsers()
+})
+
+const userTableHeaders: DataTableHeader[] = [
+  { key: 'name', title: 'Name', sortable: true },
+  { key: 'email', title: 'Email', sortable: true },
+  { key: 'role', title: 'Role', sortable: true },
+  { key: 'status', title: 'Status', sortable: false, type: 'status' },
+  { key: 'emailVerifiedAt', title: 'Email Verified', sortable: false },
+  { key: 'createdAt', title: 'Created', sortable: true, type: 'date' }
+]
+
+const mappedUsers = computed(() => users.value.map(user => ({
+  ...user,
+  name: `${user.name} ${user.lastName}`,
+  status: user.blockedAt ? 'Blocked' : 'Active',
+  emailVerifiedAt: user.emailVerifiedAt ? 'Yes' : 'No',
+})))
 </script>
 
 <template>
-	<DashboardLayout title="Users" subtitle="Manage system users and their permissions">
-		<template #actions>
-			<button v-if="authStore.hasRole('ADMIN')" @click="openCreateUserModal" class="btn btn-primary">
-				<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-					<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-					<path d="M12 5l0 14" />
-					<path d="M5 12l14 0" />
-				</svg>
-				Add User
-			</button>
-		</template>
+  <DashboardLayout title="Users" subtitle="Manage system users and their permissions">
+    <DataTable 
+      :page="page" 
+      :perPage="size"
+      :headers="userTableHeaders" 
+      :items="mappedUsers" 
+      :loading="fetchLoading" 
+      :totalItems="total"
+      :title="'Users Management'" 
+      :hasActions="true" 
+      :itemsPerPageOptions="[10, 25, 50]"
+      :hideSearch="true"
+      @update:pagination="handlePagination"
+      @update:sort="() => { }">
+      
+      <template #customFilters>
+        <div class="d-flex gap-2 align-items-center">
+          <!-- Role Filter -->
+          <select class="form-select w-auto" v-model="selectedRole">
+            <option v-for="option in roleOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- Status Filter -->
+          <select class="form-select w-auto" v-model="selectedStatus">
+            <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- Email Verified Filter -->
+          <select class="form-select w-auto" v-model="selectedEmailVerified">
+            <option v-for="option in emailVerifiedOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          
+          <!-- Reset Button -->
+          <button class="btn btn-outline-secondary btn-sm" @click="resetFilters" title="Reset all filters">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/>
+              <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
+            </svg>
+            Reset
+          </button>
+        </div>
+      </template>
+      
+      <template #rowActions="{ item }">
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm" @click.prevent="openUserDetail(item as unknown as User)" title="View detail">
+            View
+          </button>
+          <button class="btn btn-sm" @click.prevent="openEditUserModal(item as unknown as User)">
+            Edit
+          </button>
+          <button class="btn btn-sm" :class="{ 'btn-danger': !item.blockedAt, 'btn-success': item.blockedAt }"
+            @click.prevent="handleBlock(item.id as string)">
+            {{ item.blockedAt ? 'Unblock' : 'Block' }}
+          </button>
+        </div>
+      </template>
+    </DataTable>
 
-		<div class="row row-cards">
-			<div class="col-12">
-				<div class="card">
-					<div class="card-header">
-						<h3 class="card-title">Users Management</h3>
-						<div class="card-actions">
-							<div class="d-flex">
-								<input type="search" class="form-control me-3" placeholder="Search users..." aria-label="Search users">
-								<select class="form-select w-auto">
-									<option value="">All Roles</option>
-									<option value="admin">Admin</option>
-									<option value="manager">Manager</option>
-									<option value="user">User</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div class="table-responsive">
-						<table class="table table-vcenter table-mobile-md card-table">
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Email</th>
-									<th>Role</th>
-									<th>Status</th>
-									<th>Phone</th>
-									<th>Email Verified</th>
-									<th>Created</th>
-									<th class="w-1">Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="user in users" :key="user.id">
-									<td data-label="Name">
-										<div class="d-flex py-1 align-items-center">
-											<span class="avatar me-2" :style="`background-image: url(https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)})`"></span>
-											<div class="flex-fill">
-												<div class="font-weight-medium">{{ user.name }} {{ user.lastName }}</div>
-												<div class="text-secondary">ID: {{ user.id }}</div>
-											</div>
-										</div>
-									</td>
-									<td data-label="Email">
-										<div>{{ user.email }}</div>
-									</td>
-									<td data-label="Role">
-										<span class="badge">{{ user.role }}</span>
-									</td>
-									<td data-label="Status">
-										<span class="badge" :class="{
-											'bg-success': !user.blockedAt,
-											'bg-secondary': user.blockedAt
-										}">{{ !user.blockedAt ? 'Active' : 'Inactive' }}</span>
-									</td>
-									<td data-label="Phone">
-										<div>{{ user.phoneNumber }}</div>
-									</td>
-									<td data-label="Email Verified">
-										<span class="badge" :class="{
-											'bg-success': user.emailVerifiedAt,
-											'bg-secondary': !user.emailVerifiedAt
-										}">{{ user.emailVerifiedAt ? 'Yes' : 'No' }}</span>
-									</td>
-									<td data-label="Created">
-										<div>{{ user.createdAt }}</div>
-									</td>
-									<td>
-										<div class="btn-list flex-nowrap">
-											<a href="#" class="btn btn-sm" @click.prevent="openEditUserModal(user)">
-												Edit
-											</a>
-											<div class="dropdown">
-												<button class="btn btn-sm dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-													Actions
-												</button>
-												<div class="dropdown-menu dropdown-menu-end">
-													<a class="dropdown-item" href="#" @click.prevent="openEditUserModal(user)">
-														<svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-															<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-															<path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
-															<path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
-															<path d="M16 5l3 3" />
-														</svg>
-														Edit
-													</a>
-													<a class="dropdown-item" href="#" @click.prevent="deleteUser()">
-														<svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-															<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-															<path d="M4 7l16 0" />
-															<path d="M10 11l0 6" />
-															<path d="M14 11l0 6" />
-															<path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-															<path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-														</svg>
-														Delete
-													</a>
-												</div>
-											</div>
-										</div>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-					<div class="card-footer d-flex align-items-center">
-						<p class="m-0 text-secondary">Showing <span>1</span> to <span>{{ users.length }}</span> of <span>{{ users.length }}</span> entries</p>
-						<ul class="pagination m-0 ms-auto">
-							<li class="page-item disabled">
-								<a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-										<path d="M15 6l-6 6l6 6" />
-									</svg>
-									prev
-								</a>
-							</li>
-							<li class="page-item active"><a class="page-link" href="#">1</a></li>
-							<li class="page-item disabled">
-								<a class="page-link" href="#">
-									next
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-										<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-										<path d="M9 6l6 6l-6 6" />
-									</svg>
-								</a>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-	</DashboardLayout>
+    <UserDetailModal ref="detailUserModal" />
+    <UserEditModal ref="editUserModal" @save="handleEditSave" />
+    <ConfirmationDialog ref="confirmationDialog" />
+  </DashboardLayout>
 </template>
 
 <style scoped>
 .avatar {
-	width: 40px;
-	height: 40px;
-	border-radius: 50%;
-	background-size: cover;
-	background-position: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
 }
 
 .badge {
-	font-size: 0.75rem;
-	padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
 }
 
 .btn-list {
-	display: flex;
-	gap: 0.25rem;
+  display: flex;
+  gap: 0.25rem;
 }
 
 .dropdown-item-icon {
-	margin-right: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 @media (max-width: 768px) {
-	.table-mobile-md {
-		display: block;
-	}
-	
-	.table-mobile-md thead {
-		display: none;
-	}
-	
-	.table-mobile-md tr {
-		display: block;
-		border: 1px solid var(--tblr-border-color);
-		border-radius: 0.375rem;
-		margin-bottom: 1rem;
-		padding: 1rem;
-	}
-	
-	.table-mobile-md td {
-		display: block;
-		text-align: right;
-		padding: 0.5rem 0;
-		border: none;
-		border-bottom: 1px solid var(--tblr-border-color-light);
-	}
-	
-	.table-mobile-md td:last-child {
-		border-bottom: none;
-	}
-	
-	.table-mobile-md td[data-label]:before {
-		content: attr(data-label);
-		float: left;
-		font-weight: 600;
-		color: var(--tblr-secondary);
-	}
+  .table-mobile-md {
+    display: block;
+  }
+
+  .table-mobile-md thead {
+    display: none;
+  }
+
+  .table-mobile-md tr {
+    display: block;
+    border: 1px solid var(--tblr-border-color);
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+
+  .table-mobile-md td {
+    display: block;
+    text-align: right;
+    padding: 0.5rem 0;
+    border: none;
+    border-bottom: 1px solid var(--tblr-border-color-light);
+  }
+
+  .table-mobile-md td:last-child {
+    border-bottom: none;
+  }
+
+  .table-mobile-md td[data-label]:before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 600;
+    color: var(--tblr-secondary);
+  }
 }
 </style>

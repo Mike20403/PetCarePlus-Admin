@@ -1,6 +1,5 @@
 import { api } from './axios'
-import type { Booking } from '@/types/booking'
-import type { ApiResponse } from '@/types/common'
+import type { Booking, ListBookingResponse } from '@/types/booking'
 
 export interface BookingCriteria {
   query?: string;
@@ -23,7 +22,7 @@ export class BookingsService {
 		sortBy?: string,
 		sort: 'asc' | 'desc' = 'asc',
 		criteria?: BookingCriteria
-	): Promise<Booking[]> {
+	): Promise<ListBookingResponse> {
 		const params = {
 			page,
 			size,
@@ -31,30 +30,15 @@ export class BookingsService {
 			sort,
 			...criteria
 		}
-		
-		const response = await api.get(this.BASE_URL, { params })
-		return response.data as Booking[]
+		const response = await api.get<ListBookingResponse>(this.BASE_URL, { params })
+		return response.data
 	}
 
 	/**
 	 * Get a single booking by ID
 	 */
 	static async getBooking(id: string): Promise<Booking> {
-		const response = await api.get<ApiResponse<Booking>>(`${this.BASE_URL}/${id}`)
-		
-		if (response.data.success && response.data.data) {
-			return response.data.data
-		}
-		
-		throw new Error(response.data.message || 'Failed to get booking')
-	}
-
-	static async deleteBooking(id: string): Promise<void> {
-		await api.delete<ApiResponse<void>>(`${this.BASE_URL}/${id}`)
-	}
-
-	static async changeBookingStatus(id: string, status: Booking['status']): Promise<Booking> {
-		const response = await api.put<ApiResponse<Booking>>(`${this.BASE_URL}/${id}/status`, { status })
-		return response.data.data
+		const response = await api.get<Booking>(`${this.BASE_URL}/${id}`)	
+		return response.data
 	}
 }

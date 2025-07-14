@@ -1,6 +1,14 @@
 import { ref } from 'vue'
 import { UserService, type UserCriteria, type UpdateUserRequest } from '@/api/user.service'
-import type { User } from '@/types/user'
+import type { User, ListUserResponse } from '@/types/user'
+
+function toUpdateUserRequest(user: User): UpdateUserRequest {
+  return {
+    name: user.name,
+    lastName: user.lastName,
+    email: user.email,
+  }
+}
 
 export function useUsers() {
   const users = ref<User[]>([])
@@ -11,8 +19,18 @@ export function useUsers() {
     loading.value = true
     error.value = null
     try {
-      const res = await UserService.getUsers(criteria, page, size, sortBy, sort)
-      users.value = res.data.items || []
+      const res: ListUserResponse = await UserService.getUsers(criteria, page, size, sortBy, sort)
+      users.value = res.data || []
+      
+      // Transform response to match expected structure for backward compatibility
+      return {
+        ...res,
+        items: res.data || [],
+        total: res.paging?.totalItem || 0,
+        pages: res.paging?.totalPage || 1,
+        page: res.paging?.pageNumber || 1,
+        size: res.paging?.pageSize || size
+      }
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch users'
     } finally {
@@ -20,16 +38,24 @@ export function useUsers() {
     }
   }
 
-  async function updateUser(id: string, data: UpdateUserRequest) {
-    return UserService.updateUser(id, data)
+  async function getUserById(id: string) {
+    return UserService.getUserById(id)
+  }
+
+  async function updateUser(id: string, user: User) {
+    return UserService.updateUser(id, toUpdateUserRequest(user))
   }
 
   async function changeUserRole(id: string, role: string) {
     return UserService.changeUserRole(id, role)
   }
 
-  async function toggleUserBlockStatus(id: string, blocked: boolean) {
-    return UserService.toggleUserBlockStatus(id, blocked)
+  async function blockUser(id: string) {
+    return UserService.blockUser(id)
+  }
+
+  async function unblockUser(id: string) {
+    return UserService.unblockUser(id)
   }
 
   return {
@@ -37,8 +63,10 @@ export function useUsers() {
     loading,
     error,
     fetchUsers,
+    getUserById,
     updateUser,
     changeUserRole,
-    toggleUserBlockStatus
+    blockUser,
+    unblockUser
   }
-} 
+}

@@ -1,223 +1,101 @@
 <template>
   <DashboardLayout title="Withdrawals" subtitle="Manage user withdrawal requests">
-    <div class="row row-cards">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Withdrawal Requests</h3>
-            <div class="card-actions">
-              <div class="d-flex">
-                <input type="search" class="form-control me-3" placeholder="Search withdrawals..." aria-label="Search withdrawals">
-                <select class="form-select w-auto me-3">
-                  <option value="">All Statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-                <select class="form-select w-auto">
-                  <option value="">All Methods</option>
-                  <option value="bank">Bank Transfer</option>
-                  <option value="paypal">PayPal</option>
-                  <option value="stripe">Stripe</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-vcenter table-mobile-md card-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Amount</th>
-                  <th>Payment Method</th>
-                  <th>Request Date</th>
-                  <th>Status</th>
-                  <th>Notes</th>
-                  <th class="w-1">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="withdrawal in withdrawals" :key="withdrawal.id">
-                  <td data-label="User">
-                    <div class="d-flex py-1 align-items-center">
-                      <span class="avatar me-2" :style="`background-image: url(https://ui-avatars.com/api/?name=${encodeURIComponent(withdrawal.userName)})`"></span>
-                      <div class="flex-fill">
-                        <div class="font-weight-medium">{{ withdrawal.userName }}</div>
-                        <div class="text-secondary">ID: {{ withdrawal.id }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td data-label="Amount">
-                    <div class="font-weight-bold">{{ formatCurrency(withdrawal.amount) }}</div>
-                  </td>
-                  <td data-label="Payment Method">
-                    <div>{{ withdrawal.paymentMethod }}</div>
-                    <div class="text-secondary">{{ withdrawal.accountNumber }}</div>
-                  </td>
-                  <td data-label="Request Date">
-                    <div>{{ withdrawal.requestDate }}</div>
-                  </td>
-                  <td data-label="Status">
-                    <span class="badge" :class="{
-                      'bg-yellow': withdrawal.status === 'Pending',
-                      'bg-green': withdrawal.status === 'Approved',
-                      'bg-red': withdrawal.status === 'Rejected'
-                    }">{{ withdrawal.status }}</span>
-                  </td>
-                  <td data-label="Notes">
-                    <div class="text-truncate" style="max-width: 150px;">{{ withdrawal.notes }}</div>
-                  </td>
-                  <td>
-                    <div class="btn-list flex-nowrap">
-                      <a href="#" class="btn btn-sm" @click.prevent="openWithdrawalDetails(withdrawal)">
-                        View
-                      </a>
-                      <div class="dropdown" v-if="withdrawal.status === 'Pending'">
-                        <button class="btn btn-sm dropdown-toggle align-text-top" data-bs-toggle="dropdown">
-                          Actions
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-                          <a class="dropdown-item text-success" href="#" @click.prevent="approveWithdrawal(withdrawal.id)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                              <path d="M5 12l5 5l10 -10" />
-                            </svg>
-                            Approve Request
-                          </a>
-                          <a class="dropdown-item text-danger" href="#" @click.prevent="rejectWithdrawal(withdrawal.id)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                              <path d="M18 6l-12 12" />
-                              <path d="M6 6l12 12" />
-                            </svg>
-                            Reject Request
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="card-footer d-flex align-items-center">
-            <p class="m-0 text-secondary">Showing <span>1</span> to <span>{{ withdrawals.length }}</span> of <span>{{ withdrawals.length }}</span> entries</p>
-            <ul class="pagination m-0 ms-auto">
-              <li class="page-item disabled">
-                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M15 6l-6 6l6 6" />
-                  </svg>
-                  prev
-                </a>
-              </li>
-              <li class="page-item active"><a class="page-link" href="#">1</a></li>
-              <li class="page-item disabled">
-                <a class="page-link" href="#">
-                  next
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M9 6l6 6l-6 6" />
-                  </svg>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DataTable
+      :headers="withdrawalTableHeaders"
+      :items="mappedWithdrawals"
+      :loading="fetchLoading"
+      :page="currentPage"
+      :perPage="pageSize"
+      :totalItems="total"
+      :itemsPerPageOptions="[10, 25, 50]"
+      :hasActions="true"
+      @update:search="searchQuery = $event"
+      @update:pagination="handlePagination"
+      @update:sort="() => {}"
+      title="Withdrawals management"
+    >
+      <template #rowActions="{ item }">
+        <button 
+          v-if="item.status === 'PENDING'" 
+          class="btn btn-sm btn-primary" 
+          @click.prevent="openActionModal(item.id as string, 'approve')"
+        >
+          Approve
+        </button>
+        <button 
+          v-if="item.status === 'APPROVED'" 
+          class="btn btn-sm btn-success" 
+          @click.prevent="openActionModal(item.id as string, 'complete')"
+        >
+          Complete
+        </button>
+        <button 
+          v-if="item.status === 'PENDING'" 
+          class="btn btn-sm btn-danger" 
+          @click.prevent="openActionModal(item.id as string, 'reject')"
+        >
+          Reject
+        </button>
+      </template>
+    </DataTable>
+    <WithdrawalActionModal ref="actionWithdrawalModal" @success="handleActionSuccess" />
   </DashboardLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
+import DataTable, { type DataTableHeader } from '@/components/ui/DataTable.vue'
+import { useWithdrawals } from '@/hooks/useWithdrawals'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
+import WithdrawalActionModal from '@/components/withdrawal/WithdrawalActionModal.vue'
 
-interface Withdrawal {
-	id: number;
-	userName: string;
-	amount: number;
-	status: 'Pending' | 'Approved' | 'Rejected';
-	requestDate: string;
-	paymentMethod: string;
-	accountNumber: string;
-	notes: string;
+const { withdrawals, fetchWithdrawals, loading, total, currentPage, pageSize } = useWithdrawals()
+const searchQuery = ref('')
+const fetchLoading = loading
+
+const withdrawalTableHeaders: DataTableHeader[] = [
+  { key: 'amount', title: 'Amount', sortable: true, type: 'currency' },
+  { key: 'netAmount', title: 'Net Amount', sortable: true, type: 'currency' },
+  { key: 'status', title: 'Status', sortable: true, type: 'status' },
+  { key: 'bankName', title: 'Bank', sortable: false },
+  { key: 'accountNumber', title: 'Account', sortable: false },
+  { key: 'accountHolderName', title: 'Account Holder', sortable: false },
+  { key: 'createdAt', title: 'Created', sortable: true, type: 'date' }
+]
+
+const mappedWithdrawals = computed(() => withdrawals.value.map(withdrawal => ({
+  ...withdrawal,
+  // format fields if needed
+})))
+
+async function fetchAndSetWithdrawals() {
+  await fetchWithdrawals(searchQuery.value ? { query: searchQuery.value } : undefined, currentPage.value, pageSize.value)
 }
 
-
-const withdrawals = ref<Withdrawal[]>([
-	{
-		id: 1,
-		userName: 'John Doe',
-		amount: 250.00,
-		status: 'Pending',
-		requestDate: '2024-01-15',
-		paymentMethod: 'Bank Transfer',
-		accountNumber: '**** **** **** 1234',
-		notes: 'Regular withdrawal request'
-	},
-	{
-		id: 2,
-		userName: 'Jane Smith',
-		amount: 180.50,
-		status: 'Approved',
-		requestDate: '2024-01-14',
-		paymentMethod: 'PayPal',
-		accountNumber: 'jane@example.com',
-		notes: 'Service commission withdrawal'
-	},
-	{
-		id: 3,
-		userName: 'Mike Johnson',
-		amount: 95.75,
-		status: 'Rejected',
-		requestDate: '2024-01-13',
-		paymentMethod: 'Bank Transfer',
-		accountNumber: '**** **** **** 5678',
-		notes: 'Insufficient service history'
-	}
-])
-
-const showWithdrawalModal = ref(false)
-const currentWithdrawal = ref<Withdrawal | null>(null)
-
-const openWithdrawalDetails = (withdrawal: Withdrawal) => {
-	currentWithdrawal.value = withdrawal
-	showWithdrawalModal.value = true
+const handlePagination = (p: number, s: number) => {
+  currentPage.value = p
+  pageSize.value = s
+  fetchAndSetWithdrawals()
 }
 
-const approveWithdrawal = (withdrawalId: number) => {
-	if (confirm('Are you sure you want to approve this withdrawal request?')) {
-		const withdrawal = withdrawals.value.find(w => w.id === withdrawalId)
-		if (withdrawal) {
-			withdrawal.status = 'Approved'
-		}
-	}
+onMounted(fetchAndSetWithdrawals)
+watch([searchQuery, currentPage, pageSize], fetchAndSetWithdrawals)
+
+const actionWithdrawalModal = ref<InstanceType<typeof WithdrawalActionModal> | null>(null)
+
+const openActionModal = (withdrawalId: string, action: 'approve' | 'reject' | 'complete') => {
+  actionWithdrawalModal.value?.open(withdrawalId, action)
 }
 
-const rejectWithdrawal = (withdrawalId: number) => {
-	const reason = prompt('Please provide a reason for rejection:')
-	if (reason) {
-		const withdrawal = withdrawals.value.find(w => w.id === withdrawalId)
-		if (withdrawal) {
-			withdrawal.status = 'Rejected'
-			withdrawal.notes = reason
-		}
-	}
+const handleActionSuccess = async () => {
+  console.log('WithdrawalsView: handleActionSuccess called')
+  try {
+    await fetchAndSetWithdrawals()
+    console.log('WithdrawalsView: fetchAndSetWithdrawals completed successfully')
+  } catch (error) {
+    console.error('WithdrawalsView: Error in fetchAndSetWithdrawals:', error)
+  }
 }
-
-const formatCurrency = (amount: number) => {
-	return new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD'
-	}).format(amount)
-}
-
-onMounted(() => {
-	// Initialize withdrawals data
-	console.log('Withdrawals view mounted')
-})
 </script>
 
 <style scoped>
@@ -241,6 +119,13 @@ onMounted(() => {
 
 .dropdown-item-icon {
 	margin-right: 0.5rem;
+}
+
+.table td:nth-child(4), .table th:nth-child(4) {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 768px) {

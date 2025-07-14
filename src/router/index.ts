@@ -47,6 +47,12 @@ const router = createRouter({
 			meta: { requiresAuth: true, title: 'Services', roles: ['ADMIN'] }
 		},
 		{
+			path: '/pets',
+			name: 'pets',
+			component: () => import('@/pages/pets/PetsView.vue'),
+			meta: { requiresAuth: true, title: 'Pets', roles: ['ADMIN'] }
+		},
+		{
 			path: '/terms',
 			name: 'terms',
 			component: () => import('@/pages/terms/TermsView.vue'),
@@ -57,6 +63,12 @@ const router = createRouter({
 			name: 'withdrawals',
 			component: () => import('@/pages/withdrawals/WithdrawalsView.vue'),
 			meta: { requiresAuth: true, title: 'Withdrawals', roles: ['ADMIN'] }
+		},
+		{
+			path: '/notifications',
+			name: 'notifications',
+			component: () => import('@/pages/notifications/NotificationsView.vue'),
+			meta: { requiresAuth: true, title: 'Notifications', roles: ['ADMIN'] }
 		},
 		{
 			path: '/:pathMatch(.*)*',

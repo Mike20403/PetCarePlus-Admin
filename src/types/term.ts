@@ -1,9 +1,9 @@
 // Term Types
 export enum TermsType {
 	USER_TERMS = 'USER_TERMS',
+	PROVIDER_TERMS = 'PROVIDER_TERMS',
 	PRIVACY_POLICY = 'PRIVACY_POLICY',
-	REFUND_POLICY = 'REFUND_POLICY',
-	OTHER = 'OTHER'
+	PAYMENT_TERMS = 'PAYMENT_TERMS'
 }
 
 export interface Term {
@@ -13,7 +13,7 @@ export interface Term {
 	version: string;
 	title: string;
 	content: string;
-	isActive: boolean;
+	active: boolean;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -23,13 +23,13 @@ export interface CreateTermsRequest {
 	language: string;
 	title: string;
 	content: string;
-	version: string;
-	isActive: boolean;
 }
 
 export interface UpdateTermsRequest {
+	type?: TermsType;
+	language?: string;
 	title?: string;
 	content?: string;
 	version?: string;
-	isActive?: boolean;
+	active?: boolean;
 }

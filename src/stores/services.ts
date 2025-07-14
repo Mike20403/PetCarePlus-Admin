@@ -1,27 +1,30 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { ServicesService, type Service } from '@/api'
-import { useToast } from '@/composables/useToast'
+import { useToast } from '@/hooks/useToast'
 
 export const useServicesStore = defineStore('services', () => {
   const services = ref<Service[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const selectedService = ref<Service | null>(null)
-  const { showToast } = useToast()
+  const { toast } = useToast()
 
   const totalServices = computed(() => services.value.length)
 
   async function fetchServices() {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await ServicesService.getServices()
-      services.value = response
+      services.value = response.data || []
     } catch (err) {
       error.value = 'Failed to fetch services'
-      showToast('Failed to fetch services', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to fetch services'
+      })
       console.error(err)
     } finally {
       isLoading.value = false
@@ -31,14 +34,17 @@ export const useServicesStore = defineStore('services', () => {
   async function fetchServiceById(id: string) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await ServicesService.getService(id)
       selectedService.value = response
       return response
     } catch (err) {
       error.value = 'Failed to fetch service details'
-      showToast('Failed to fetch service details', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to fetch service details'
+      })
       console.error(err)
       return null
     } finally {
@@ -49,15 +55,21 @@ export const useServicesStore = defineStore('services', () => {
   async function createService(serviceData: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await ServicesService.createService(serviceData)
       services.value.push(response)
-      showToast('Service created successfully', 'success')
+      toast({
+        type: 'success',
+        message: 'Service created successfully'
+      })
       return response
     } catch (err) {
       error.value = 'Failed to create service'
-      showToast('Failed to create service', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to create service'
+      })
       console.error(err)
       return null
     } finally {
@@ -68,21 +80,27 @@ export const useServicesStore = defineStore('services', () => {
   async function updateService(id: string, serviceData?: Partial<Service>) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const response = await ServicesService.updateService(id, serviceData)
-      
+
       // Update the service in the local state
       const index = services.value.findIndex(service => service.id === id)
       if (index !== -1) {
         services.value[index] = response
       }
-      
-      showToast('Service updated successfully', 'success')
+
+      toast({
+        type: 'success',
+        message: 'Service updated successfully'
+      })
       return response
     } catch (err) {
       error.value = 'Failed to update service'
-      showToast('Failed to update service', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to update service'
+      })
       console.error(err)
       return null
     } finally {
@@ -97,18 +115,24 @@ export const useServicesStore = defineStore('services', () => {
   async function deleteService(id: string) {
     isLoading.value = true
     error.value = null
-    
+
     try {
       await ServicesService.deleteService(id)
-      
+
       // Remove the service from the local state
       services.value = services.value.filter(service => service.id !== id)
-      
-      showToast('Service deleted successfully', 'success')
+
+      toast({
+        type: 'success',
+        message: 'Service deleted successfully'
+      })
       return true
     } catch (err) {
       error.value = 'Failed to delete service'
-      showToast('Failed to delete service', 'error')
+      toast({
+        type: 'error',
+        message: 'Failed to delete service'
+      })
       console.error(err)
       return false
     } finally {

@@ -34,7 +34,6 @@
 								<IconHome />
 							</span>
 							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Dashboard</span>
-							<span v-if="!sidebarStore.isCollapsed" class="nav-link-badge badge bg-blue ms-auto">3</span>
 						</RouterLink>
 					</li>
 				</ul>
@@ -58,46 +57,22 @@
 								<IconCalendar />
 							</span>
 							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Bookings</span>
-							<span v-if="!sidebarStore.isCollapsed" class="nav-link-badge badge bg-yellow ms-auto">12</span>
 						</RouterLink>
 					</li>
 					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
 						<RouterLink to="/services" class="nav-link" active-class="active">
 							<span class="nav-link-icon">
-								<IconPaw />
+								<IconActivity />
 							</span>
 							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Services</span>
 						</RouterLink>
 					</li>
-				</ul>
-			</div>
-
-			<!-- Operations Section -->
-			<div class="nav-section">
-				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">Operations</div>
-				<ul class="nav-items">
-					<li class="nav-item">
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
 						<RouterLink to="/pets" class="nav-link" active-class="active">
 							<span class="nav-link-icon">
 								<IconPaw />
 							</span>
 							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Pets</span>
-						</RouterLink>
-					</li>
-					<li class="nav-item">
-						<RouterLink to="/appointments" class="nav-link" active-class="active">
-							<span class="nav-link-icon">
-								<IconCalendar />
-							</span>
-							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Appointments</span>
-						</RouterLink>
-					</li>
-					<li class="nav-item">
-						<RouterLink to="/customers" class="nav-link" active-class="active">
-							<span class="nav-link-icon">
-								<IconUsers />
-							</span>
-							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Customers</span>
 						</RouterLink>
 					</li>
 				</ul>
@@ -107,14 +82,6 @@
 			<div class="nav-section">
 				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">Finance</div>
 				<ul class="nav-items">
-					<li class="nav-item">
-						<RouterLink to="/reports" class="nav-link" active-class="active">
-							<span class="nav-link-icon">
-								<IconFile />
-							</span>
-							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Reports</span>
-						</RouterLink>
-					</li>
 					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
 						<RouterLink to="/withdrawals" class="nav-link" active-class="active">
 							<span class="nav-link-icon">
@@ -130,6 +97,14 @@
 			<div class="nav-section">
 				<div class="nav-section-title" v-if="!sidebarStore.isCollapsed">System</div>
 				<ul class="nav-items">
+					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
+						<RouterLink to="/notifications" class="nav-link" active-class="active">
+							<span class="nav-link-icon">
+								<IconBell />
+							</span>
+							<span class="nav-link-title" v-if="!sidebarStore.isCollapsed">Notifications</span>
+						</RouterLink>
+					</li>
 					<li class="nav-item" v-if="authStore.hasRole('ADMIN')">
 						<RouterLink to="/terms" class="nav-link" active-class="active">
 							<span class="nav-link-icon">
@@ -181,7 +156,9 @@ import {
 	IconFile, 
 	IconSettings, 
 	IconLogout, 
-	IconPaw, 
+	IconPaw,
+	IconBell,
+	IconActivity,
 } from '@tabler/icons-vue'
 
 const authStore = useAuthStore()
@@ -322,8 +299,8 @@ onMounted(() => {
 .sidebar-content {
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
-	padding: 1.5rem 0;
+	gap: 0.75rem;
+	padding: 1rem 0;
 	flex: 1;
 	overflow-y: auto;
 }
@@ -345,7 +322,7 @@ onMounted(() => {
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 	color: rgba(255, 255, 255, 0.5);
-	padding: 0 1rem 0.75rem 1rem;
+	padding: 0 1rem 0.5rem 1rem;
 	transition: opacity 0.3s ease;
 }
 
@@ -360,12 +337,9 @@ onMounted(() => {
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
+	gap: 0.2rem;
 }
 
-.nav-item {
-	/* No margin needed */
-}
 
 .nav-link {
 	display: flex;
