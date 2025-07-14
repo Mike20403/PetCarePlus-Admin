@@ -8,7 +8,6 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { useAuthStore } from './stores/auth'
-import { createI18n } from 'vue-i18n'
 
 
 const app = createApp(App)
@@ -19,15 +18,6 @@ app.use(router)
 
 // Initialize auth store after pinia is setup
 const authStore = useAuthStore()
-
-const i18n = createI18n({
-	legacy: false,
-	locale: 'vi',
-	messages: {
-	  vi: {}, // Thêm messages thực tế của bạn ở đây
-	  en: {}
-	}
-  })
 
 // Wait for router to be ready and then handle initial auth state
 router.isReady().then(() => {
@@ -44,5 +34,4 @@ router.isReady().then(() => {
 		router.push('/')
 	}
 })
-app.use(i18n)
 app.mount('#app')
