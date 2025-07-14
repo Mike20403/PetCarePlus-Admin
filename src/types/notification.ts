@@ -1,3 +1,5 @@
+import type { PaginationResponse } from './pagination'
+
 export interface Notification {
   id: string
   userIdSend: string
@@ -20,7 +22,11 @@ export enum NotificationType {
   PROMOTION = 'PROMOTION'
 }
 
-export interface ListNotificationResponse {
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ListNotificationResponse extends PaginationResponse<Notification> {}
+
+// Keep backward compatibility
+export interface LegacyListNotificationResponse {
   page: number
   pages: number
   size: number

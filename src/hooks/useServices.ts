@@ -2,7 +2,6 @@ import { ServicesService, type ServiceCriteria } from '@/api/services.service'
 import type { Service, ServiceRequest, ServicePatchRequest } from '@/types/service'
 import { ref } from 'vue'
 
-
 export function useServices() {
   const services = ref<Service[]>([])
   const loading = ref(false)
@@ -17,11 +16,20 @@ export function useServices() {
     error.value = null
     try {
       const res = await ServicesService.getServices(criteria, page, size, sortBy, sort)
-      services.value = res.content
-      total.value = res.totalElements
-      pages.value = res.totalPages
-      pageSize.value = res.size
-      return res
+      services.value = res.data || []
+      total.value = res.paging?.totalItem || 0
+      pages.value = res.paging?.totalPage || 1
+      pageSize.value = res.paging?.pageSize || size
+      
+      // Transform response to match expected structure for backward compatibility
+      return {
+        ...res,
+        content: res.data || [],
+        totalElements: res.paging?.totalItem || 0,
+        totalPages: res.paging?.totalPage || 1,
+        page: res.paging?.pageNumber || page,
+        size: res.paging?.pageSize || size
+      }
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch services'
     } finally {
@@ -34,11 +42,20 @@ export function useServices() {
     error.value = null
     try {
       const res = await ServicesService.searchServicesAdvanced(criteria, page, size, sortBy, sort)
-      services.value = res.content
-      total.value = res.totalElements
-      pages.value = res.totalPages
-      pageSize.value = res.size
-      return res
+      services.value = res.data || []
+      total.value = res.paging?.totalItem || 0
+      pages.value = res.paging?.totalPage || 1
+      pageSize.value = res.paging?.pageSize || size
+      
+      // Transform response to match expected structure for backward compatibility
+      return {
+        ...res,
+        content: res.data || [],
+        totalElements: res.paging?.totalItem || 0,
+        totalPages: res.paging?.totalPage || 1,
+        page: res.paging?.pageNumber || page,
+        size: res.paging?.pageSize || size
+      }
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to search services'
     } finally {

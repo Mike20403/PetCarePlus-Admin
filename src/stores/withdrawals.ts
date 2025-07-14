@@ -39,7 +39,7 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
 
     try {
       const response = await WithdrawalsService.getWithdrawals()
-      withdrawals.value = response.items
+      withdrawals.value = response.data || []
     } catch (err) {
       error.value = 'Failed to fetch withdrawals'
       toast({
@@ -151,7 +151,7 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
 
     try {
       const response = await WithdrawalsService.getWithdrawals({ query: userId })
-      return response.items
+      return response.data || []
     } catch (err) {
       error.value = 'Failed to fetch user withdrawals'
       toast({
@@ -171,7 +171,7 @@ export const useWithdrawalsStore = defineStore('withdrawals', () => {
 
     try {
       const response = await WithdrawalsService.getWithdrawals({ status })
-      return response.items
+      return response.data || []
     } catch (err) {
       error.value = `Failed to fetch ${status} withdrawals`
       toast({

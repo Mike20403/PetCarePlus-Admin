@@ -1,3 +1,5 @@
+import type { PaginationResponse } from './pagination'
+
 export interface Pet {
   id: string
   userId: string
@@ -40,7 +42,11 @@ export interface PetPatchRequest {
   imageUrl?: string
 }
 
-export interface ListPetResponse {
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ListPetResponse extends PaginationResponse<Pet> {}
+
+// Keep backward compatibility
+export interface LegacyListPetResponse {
   page: number
   pages: number
   size: number
