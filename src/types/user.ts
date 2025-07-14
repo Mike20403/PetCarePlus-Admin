@@ -20,6 +20,7 @@ export interface User {
 	deletedAt?: string | null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ListUserResponse extends PaginationResponse<User> {}
 
 export interface UserRequest {

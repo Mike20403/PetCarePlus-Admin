@@ -22,6 +22,7 @@ export enum NotificationType {
   PROMOTION = 'PROMOTION'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ListNotificationResponse extends PaginationResponse<Notification> {}
 
 // Keep backward compatibility

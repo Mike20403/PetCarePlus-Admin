@@ -43,6 +43,7 @@ export interface Booking {
 	deletedAt?: string | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ListBookingResponse extends PaginationResponse<Booking> {}
 
 // Keep backward compatibility

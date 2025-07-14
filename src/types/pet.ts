@@ -42,6 +42,7 @@ export interface PetPatchRequest {
   imageUrl?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ListPetResponse extends PaginationResponse<Pet> {}
 
 // Keep backward compatibility

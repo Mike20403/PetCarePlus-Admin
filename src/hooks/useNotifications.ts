@@ -2,6 +2,15 @@ import { ref } from 'vue'
 import { NotificationsService, type NotificationCriteria } from '@/api/notifications.service'
 import type { Notification, ListNotificationResponse } from '@/types/notification'
 
+// Type for backward compatibility response
+interface BackwardCompatibleResponse extends ListNotificationResponse {
+  items?: Notification[]
+  total?: number
+  pages?: number
+  page?: number
+  size?: number
+}
+
 export function useNotifications() {
   const notifications = ref<Notification[]>([])
   const loading = ref(false)
@@ -13,7 +22,7 @@ export function useNotifications() {
     size = 10,
     sortBy = 'createdAt',
     sort: 'asc' | 'desc' = 'desc'
-  ): Promise<ListNotificationResponse | null> {
+  ): Promise<BackwardCompatibleResponse | null> {
     loading.value = true
     error.value = null
     
@@ -29,7 +38,7 @@ export function useNotifications() {
         pages: response.paging?.totalPage || 1,
         page: response.paging?.pageNumber || 1,
         size: response.paging?.pageSize || size
-      } as any
+      } as BackwardCompatibleResponse
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch notifications'
       return null
