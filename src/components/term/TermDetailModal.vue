@@ -106,5 +106,6 @@ defineExpose({
 
 .badge {
   font-size: 0.75rem;
+  color: white !important;
 }
 </style> 
