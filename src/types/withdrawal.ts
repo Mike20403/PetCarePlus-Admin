@@ -1,3 +1,5 @@
+import type { PaginationResponse } from './pagination'
+
 // Withdrawal Types
 export enum WithdrawalStatus {
 	PENDING = 'PENDING',
@@ -35,7 +37,10 @@ export interface WithdrawalActionRequest {
 	transactionNote?: string;
 }
 
-export interface ListWithdrawalResponse {
+export interface ListWithdrawalResponse extends PaginationResponse<Withdrawal> {}
+
+// Keep backward compatibility
+export interface LegacyListWithdrawalResponse {
 	page: number;
 	pages: number;
 	size: number;

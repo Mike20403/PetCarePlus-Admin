@@ -31,7 +31,7 @@ export const useBookingsStore = defineStore('bookings', () => {
 
     try {
       const response = await BookingsService.getBookings()
-      bookings.value = response.content
+      bookings.value = response.data || []
     } catch (err) {
       error.value = 'Failed to fetch bookings'
       toast({

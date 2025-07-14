@@ -1,5 +1,5 @@
 import { api } from './axios'
-import type { Booking } from '@/types/booking'
+import type { Booking, ListBookingResponse } from '@/types/booking'
 
 export interface BookingCriteria {
   query?: string;
@@ -22,7 +22,7 @@ export class BookingsService {
 		sortBy?: string,
 		sort: 'asc' | 'desc' = 'asc',
 		criteria?: BookingCriteria
-	): Promise<{ content: Booking[]; totalElements: number; totalPages: number; page: number; size: number; }> {
+	): Promise<ListBookingResponse> {
 		const params = {
 			page,
 			size,
@@ -30,15 +30,8 @@ export class BookingsService {
 			sort,
 			...criteria
 		}
-		const response = await api.get(this.BASE_URL, { params })
-		const data = response.data as { content: Booking[]; totalElements: number; totalPages: number; number: number; size: number }
-		return {
-		  content: data.content || [],
-		  totalElements: data.totalElements || 0,
-		  totalPages: data.totalPages || 1,
-		  page: data.number || 1,
-		  size: data.size || size
-		}
+		const response = await api.get<ListBookingResponse>(this.BASE_URL, { params })
+		return response.data
 	}
 
 	/**

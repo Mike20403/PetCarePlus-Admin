@@ -11,18 +11,16 @@ export interface User {
 	email: string
 	name: string
 	lastName: string
+	phoneNumber?: string
 	role: string
 	emailVerifiedAt?: string | null
-	phoneNumber?: string // always string or undefined
 	blockedAt?: string | null
 	createdAt: string
 	updatedAt: string
 	deletedAt?: string | null
 }
 
-export interface ListUserResponse extends PaginationResponse<User> {
-  [x: string]: unknown
-}
+export interface ListUserResponse extends PaginationResponse<User> {}
 
 export interface UserRequest {
 	name: string
@@ -36,7 +34,7 @@ export interface UserInfo {
 	email: string
 	name: string
 	lastName: string
-	phoneNumber: string
+	phoneNumber?: string
 	role: string
 	emailVerifiedAt: string | null
 	blockedAt: string | null

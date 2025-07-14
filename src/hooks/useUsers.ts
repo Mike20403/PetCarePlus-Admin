@@ -20,8 +20,17 @@ export function useUsers() {
     error.value = null
     try {
       const res: ListUserResponse = await UserService.getUsers(criteria, page, size, sortBy, sort)
-      users.value = res.items || []
-      return res
+      users.value = res.data || []
+      
+      // Transform response to match expected structure for backward compatibility
+      return {
+        ...res,
+        items: res.data || [],
+        total: res.paging?.totalItem || 0,
+        pages: res.paging?.totalPage || 1,
+        page: res.paging?.pageNumber || 1,
+        size: res.paging?.pageSize || size
+      }
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch users'
     } finally {

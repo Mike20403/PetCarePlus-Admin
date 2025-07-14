@@ -1,6 +1,5 @@
 import { api } from './axios'
-import type { Service, ServiceRequest, ServicePatchRequest } from '@/types/service'
-
+import type { Service, ServiceRequest, ServicePatchRequest, ListServiceResponse } from '@/types/service'
 
 export interface ServiceCriteria {
   query?: string;
@@ -20,17 +19,10 @@ export class ServicesService {
 		size: number = 10,
 		sortBy: string = 'createdAt',
 		sort: 'asc' | 'desc' = 'asc'
-	): Promise<{ content: Service[]; totalElements: number; totalPages: number; page: number; size: number; }> {
+	): Promise<ListServiceResponse> {
 		const params = { ...criteria, page, size, sortBy, sort }
-		const response = await api.get(this.BASE_URL, { params })
-		const data = response.data as { content: Service[]; totalElements: number; totalPages: number; number: number; size: number }
-		return {
-			content: data.content || [],
-			totalElements: data.totalElements || 0,
-			totalPages: data.totalPages || 1,
-			page: data.number || 1,
-			size: data.size || size
-		}
+		const response = await api.get<ListServiceResponse>(this.BASE_URL, { params })
+		return response.data
 	}
 
 	/**
@@ -42,7 +34,7 @@ export class ServicesService {
 		size: number = 10,
 		sortBy: string = 'createdAt',
 		sort: 'asc' | 'desc' = 'asc'
-	): Promise<{ content: Service[]; totalElements: number; totalPages: number; page: number; size: number; }> {
+	): Promise<ListServiceResponse> {
 		const params = {
 			...criteria,
 			page,
@@ -54,16 +46,9 @@ export class ServicesService {
 		console.log('Advanced search API call with params:', params)
 		
 		try {
-			const response = await api.get(`${this.BASE_URL}/search/advanced`, { params })
+			const response = await api.get<ListServiceResponse>(`${this.BASE_URL}/search/advanced`, { params })
 			console.log('Advanced search response:', response.data)
-			const data = response.data as { content: Service[]; totalElements: number; totalPages: number; number: number; size: number }
-			return {
-				content: data.content || [],
-				totalElements: data.totalElements || 0,
-				totalPages: data.totalPages || 1,
-				page: data.number || 1,
-				size: data.size || size
-			}
+			return response.data
 		} catch (error) {
 			console.error('Advanced search API error:', error)
 			throw error

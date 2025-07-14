@@ -16,11 +16,21 @@ export function useBookings() {
     error.value = null
     try {
       const res = await BookingsService.getBookings(pageNum, sizeNum, sortBy, sort, criteria)
-      bookings.value = res.content || []
-      total.value = res.totalElements || 0
-      page.value = res.page || 1
-      size.value = res.size || sizeNum
-      totalPages.value = res.totalPages || 1
+      bookings.value = res.data || []
+      total.value = res.paging?.totalItem || 0
+      page.value = res.paging?.pageNumber || pageNum
+      size.value = res.paging?.pageSize || sizeNum
+      totalPages.value = res.paging?.totalPage || 1
+      
+      // Transform response to match expected structure for backward compatibility
+      return {
+        ...res,
+        content: res.data || [],
+        totalElements: res.paging?.totalItem || 0,
+        totalPages: res.paging?.totalPage || 1,
+        page: res.paging?.pageNumber || pageNum,
+        size: res.paging?.pageSize || sizeNum
+      }
     } catch (e) {
       error.value = (e as { message: string}).message || 'Failed to fetch bookings'
     } finally {

@@ -1,4 +1,5 @@
 import type { User } from './user'
+import type { PaginationResponse } from './pagination'
 
 // Booking Types
 export interface ProviderServiceResponse {
@@ -33,13 +34,24 @@ export interface Booking {
 	bookingTime: string;
 	scheduledStartTime: string;
 	scheduledEndTime: string;
-	actualEndTime: string | null;
-	cancellationReason: string | null;
-	note: string | null;
+	actualEndTime?: string | null;
+	cancellationReason?: string | null;
+	note?: string | null;
 	petList: BookingPetServiceResponse[];
 	createdAt: string;
 	updatedAt: string;
-	deletedAt: string | null;
+	deletedAt?: string | null;
+}
+
+export interface ListBookingResponse extends PaginationResponse<Booking> {}
+
+// Keep backward compatibility
+export interface LegacyListBookingResponse {
+	content: Booking[];
+	totalElements: number;
+	totalPages: number;
+	page: number;
+	size: number;
 }
 
 // Common Entity Types

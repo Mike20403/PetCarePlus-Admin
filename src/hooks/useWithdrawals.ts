@@ -16,11 +16,20 @@ export function useWithdrawals() {
     error.value = null
     try {
       const res = await WithdrawalsService.getWithdrawals(criteria, page, size, sortBy, sort)
-      withdrawals.value = res.items
-      total.value = res.total
-      pages.value = res.pages
-      pageSize.value = res.size
-      return res
+      withdrawals.value = res.data || []
+      total.value = res.paging?.totalItem || 0
+      pages.value = res.paging?.totalPage || 1
+      pageSize.value = res.paging?.pageSize || size
+      
+      // Transform response to match expected structure for backward compatibility
+      return {
+        ...res,
+        items: res.data || [],
+        total: res.paging?.totalItem || 0,
+        pages: res.paging?.totalPage || 1,
+        page: res.paging?.pageNumber || 1,
+        size: res.paging?.pageSize || size
+      }
     } catch (e: unknown) {
       error.value = e instanceof Error ? e.message : 'Failed to fetch withdrawals'
     } finally {
